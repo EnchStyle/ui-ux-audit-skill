@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.0 (2026-09-26)
+
+- **Measuring script** `scripts/uicheck.py`: renders at 360, 768 and 1280px and measures 25 checks, including alignment faults (lone grid items, card rows and tile values off a shared line, control heights, nested radii, near-miss edges, padding asymmetry, media ratios, gutters, chip and icon sizes, sticky headers) plus a census of radii, shadows, type sizes and section paddings.
+- **Alignment and consistency** reference with a global system block (type scale, spacing, gutters, radii, control heights, media ratios) and a measured check for each fault.
+- **Visual quality** reference: rating scale, AI default looks (including the generic SaaS look), moves per page type. Scored on landing pages; advice on dashboards, reports, shops and apps.
+- **Build mode** replaces prevention: art direction from three sketched directions, global system first, every figure computed and checked twice, measure-and-fix loop, cold self-review.
+- **Precision:** new "What not to flag" rules (static-page wiring, latent issues, house font floors, WCAG 2.5.8 and 1.4.11 exceptions, missing dark mode, deliberate choices) and default severities for about 30 common findings. Scoring caps Polish at 5 points.
+- **New profile:** analytics reports. Kids-app profile renamed `profile-kids-app.md`; all profiles updated.
+- **Corrections:** `overflow-wrap: anywhere` over `break-word`, accurate `text-wrap` support, subgrid first, axe-core does not catch removed focus rings, current WCAG 2.2, EN 301 549 and European Accessibility Act status.
+- Reference files reorganised: `consistency-tokens-nav.md` split into `alignment-consistency.md` and `navigation-icons.md`; `anti-slop-copy.md` split into `visual-excellence.md` and `content-honesty.md`.
+- Benchmark results in the README.
+
 ## 1.1.0 (2026-06-15)
 
 - New **simulate-the-user-first** method (`references/user-simulation.md`): walk the flow as the target user, a constrained user, and an edge-case-data user before the category sweep — catches experiential failures a static scan misses (contradictory states, mislabelled scope, happy-path-only flows). Wired into the full-audit procedure.
