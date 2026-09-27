@@ -22,6 +22,8 @@ The skill holds every element to one global system and measures the faults peopl
 
 `scripts/uicheck.py page.html --json checks.json --shots shots/` reports overflow, contrast, target sizes, unnamed controls, invisible focus, unsized media, heading order, small text, widows, lone grid items, card rows and tile values off a shared line, control heights, nested radii, near-miss edges, padding asymmetry, media ratios, icon and chip sizes, gutters, table alignment, missing sticky headers, heading proximity, and a census of radii, shadows, font sizes and section paddings. It measures; Claude judges.
 
+Requirements: Python 3 with Playwright and Chromium (`pip install playwright`, then `playwright install chromium`). It accepts a local HTML file or an http(s) URL; `--dark` checks the dark theme and `--widths` changes the widths.
+
 ### Finding format
 
 ```
