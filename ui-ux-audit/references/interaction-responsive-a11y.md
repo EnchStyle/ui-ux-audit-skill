@@ -1,42 +1,73 @@
-# Categories 7-9: Touch and Interaction, Responsive, Accessibility
+# Categories 7 to 9: Touch and Interaction, Responsive Behaviour, Accessibility
 
 ## Category 7: Touch and interaction
 
-- **Touch target floor.** 44x44px practical minimum (Apple HIG and WCAG AAA; the WCAG 2.2 AA legal floor is only 24px, but treat 44px as the real-world bar); 48px is the comfortable Android baseline. Icons used as buttons get padding to reach the floor: a 24px icon needs roughly 10-12px padding all around. Project profiles may raise this floor (see the active profile, e.g. the kids-app example).
-- **Spacing between targets.** At least 8px between adjacent tappable elements so a thumb cannot hit both. Dense icon rows (table row actions) are the usual offender.
-- **Visual size vs hit area.** If the design wants a small-looking control, extend the hit area with inner padding or a pseudo-element, not by inflating the visual.
-- **Press feedback.** Every tap needs visible confirmation that it registered: `active:scale-[0.98]` or a 1px translate or shadow shift. Static buttons feel broken on touch.
-- **Tap highlight and selection.** Customize `-webkit-tap-highlight-color` and pair with an explicit active state. Game-like or rapidly tapped UI also needs `touch-action: manipulation` (kills the 300ms double-tap-zoom delay) and `select-none` so long presses do not trigger text selection or callouts.
-- **Hover is an enhancement.** Anything required to operate the UI (revealing actions, showing prices, opening menus) must work without hover. Hover-revealed row actions need a touch alternative (always visible on touch, or a kebab menu).
-- **Safe areas.** Bottom navs, FABs, and toasts respect `env(safe-area-inset-bottom)` (and top for notches in fullscreen). A CTA under the iOS home indicator is a Blocker on the devices that matter.
-- **Scroll behavior.** Momentum scrolling preserved; no scroll hijacking; horizontal carousels use scroll-snap and do not trap vertical page scrolling; pull-to-refresh not accidentally triggered by in-app gestures.
-- **Drag and gesture affordances.** Draggables look draggable (handle, cursor) and have a non-drag alternative (buttons, keyboard) for reordering.
+- **Target size.** The legal floor is WCAG 2.2 SC 2.5.8 (AA): at least 24 × 24px, unless a 24px circle
+  centred on the target does not touch another target (spacing exception), or the target is a link
+  inside a sentence or list of text (inline exception). Below that floor: Critical on a primary
+  control, Warning otherwise. The comfortable size for primary controls on touch-first products is
+  44px (48px on Android): a primary control of 24 to 43px there is a Warning. Dense 32px controls on
+  a pointer-first dashboard with room around them are correct. Profiles may raise the floor.
+- **Spacing between targets**: at least 8px between adjacent tappable controls; row actions in dense
+  tables are the usual offender. Mis-clickable adjacent destructive actions are Critical.
+- **Visual size versus hit area**: extend a small-looking control's hit area with padding or a
+  pseudo-element instead of inflating the visual.
+- **Press feedback**: every tap shows it registered (a slight scale or shift, a colour change).
+- **Hover is an enhancement**: anything required to operate the page works without hover.
+- **Safe areas**: bottom bars, floating buttons and toasts respect `env(safe-area-inset-bottom)`.
+- **Scrolling**: no scroll hijacking; carousels use scroll snap and do not trap vertical scrolling.
+- **Drag** always has a non-drag alternative.
 
-## Category 8: Responsive and adaptive
+## Category 8: Responsive behaviour
 
-- **Test the narrow truth: 360px.** Mentally (or actually) render at 360px wide. Any horizontal scroll is a Critical; find the fixed width, unwrapped flex row, or missing `min-w-0` causing it.
-- **Breakpoint coverage.** Layouts defined at mobile AND desktop, with the awkward middle (tablet, ~768px) checked: two-column layouts that look right at 1280px often produce 140px-wide squeezed columns at 800px.
-- **Explicit collapse per section.** Every multi-column layout declares its sub-768px behavior in the same component. "Tailwind will handle it" is how 5-column grids end up as 5 stacked full-width sections with no spacing adjustments.
-- **Type scales across viewports.** Display text steps down on mobile (`text-6xl` desktop hero is `text-4xl` on phone); body text does not shrink below the floor. Use responsive type classes or `clamp()`.
-- **Touch floors survive shrinking.** Buttons sized with relative units can drop below 44px at small widths; set `min-h-*`/`min-w-*` floors.
-- **Don't hide, reorder.** `hidden md:block` on meaningful content makes it invisible to the majority mobile audience. Reorder, collapse into disclosure, or redesign; hide only true redundancies.
-- **Navigation collapse.** Desktop nav fits one line (condense or move items to a menu otherwise; a two-line desktop nav is broken). Mobile gets a deliberate pattern: bottom bar for 3-5 primary destinations, hamburger/sheet for secondary.
-- **Modals on mobile.** Centered dialog cards become full-screen or bottom sheets under ~640px; a 320px-wide centered modal with internal scrolling is hostile.
-- **Media fluidity.** `max-w-full h-auto` on images; videos and iframes in aspect-ratio boxes; tables get horizontal scroll containers or a stacked mobile rendering, never page-wide overflow.
-- **Orientation and short viewports.** Landscape phones and small laptop windows (700px tall) must not hide primary CTAs below the fold inside non-scrolling heroes (`h-screen` heroes with content beyond 100vh are the usual bug; prefer `min-h-screen` or `svh` units).
-- **Hover/pointer media queries.** Fine-pointer affordances gated with `@media (hover: hover)` where they would misfire on touch.
+- **360px is the narrow truth.** Any page-level horizontal scroll is Critical; find the fixed width,
+  unwrapped row or missing `min-width: 0` that causes it.
+- **The awkward middle.** Check 768px: two-column layouts that look right at 1280px often squeeze to
+  unreadable columns there.
+- **Every multi-column block declares its narrow behaviour**; type steps down on phones (`clamp()`),
+  body text does not.
+- **Wide tables and nav strips**: a contained horizontal scroller is an accepted pattern. Without a
+  visible cue that more is hidden (an edge fade, shadow, arrow or hint, or an item cut mid-word
+  with nothing else to signal it), it is a Polish finding, not more. A sticky first column is a bonus.
+  Page-level overflow from a table is Critical.
+- **Navigation collapse.** Desktop navigation fits on one line at every desktop width you ship (a nav
+  that wraps at 1280px is a Warning). Hiding secondary section links on phones is fine when the page
+  is one scroll and the primary action stays; hiding destinations a phone user needs (sign in,
+  pricing, contact, a shop's categories) with no menu is Critical.
+- **Do not hide load-bearing content** at a breakpoint; reorder or collapse it.
+- **Modals on phones** become full-screen or bottom sheets.
+- **Short viewports**: landscape phones and 700px-tall laptop windows must not push the primary action
+  out of a `height: 100vh` hero; prefer `min-height: 100svh`.
+- **Media** is fluid (`max-width: 100%; height: auto`), embeds sit in aspect-ratio boxes.
 
 ## Category 9: Accessibility
 
-Beyond contrast (Category 4) and forms (Category 6), which already carry their a11y rules:
+Contrast (Category 4) and forms (Category 6) carry their own accessibility rules.
 
-- **Semantic elements.** `<button>` for actions, `<a href>` for navigation; never `<div onClick>`. Lists are `<ul>/<ol>`, page regions use landmarks (`<nav>`, `<main>`, `<header>`, `<footer>`). Semantics give keyboard and screen-reader behavior for free; divs give nothing.
-- **Keyboard completeness.** Every action reachable and operable by keyboard alone: logical tab order following visual order, Enter/Space activating controls, Escape closing overlays, arrow keys in menus/tabs/radio groups. Walk the page as a keyboard user during a full audit.
-- **Focus visibility.** `outline-none` without a `focus-visible:` replacement is a Blocker. Focus indicators meet 3:1 contrast and are not clipped by `overflow-hidden` parents.
-- **Focus management on change.** Route changes move focus to the new page heading; opening a modal moves focus in; closing restores it; deleting an item moves focus to a sensible neighbor. Lost focus (reset to body) strands keyboard users.
-- **Names for everything interactive.** Icon-only buttons get `aria-label`; inputs get labels; links make sense out of context ("View invoice #341", not "Click here").
-- **Images.** Meaningful images get descriptive `alt`; decorative images get `alt=""` (empty, present). Text baked into images is a failure: real text instead.
-- **ARIA: less, but correct.** Prefer native elements over ARIA recreations. Where used: state attributes kept in sync (`aria-expanded`, `aria-selected`, `aria-current="page"` on active nav), live regions (`aria-live="polite"`) for async status messages like "Saved" or validation summaries.
-- **Motion and vestibular safety.** All non-essential animation wrapped in `motion-safe:` or behind `prefers-reduced-motion`; parallax and large zooms are the worst offenders. (Details in Category 12.)
-- **Zoom and reflow.** Page remains usable at 200% browser zoom and 320px-equivalent reflow; no content or controls lost. Avoid disabling pinch zoom (`user-scalable=no` is banned).
-- **Target the standard, note the law.** Audit against WCAG 2.2 AA. For public-sector or EU-consumer-facing products, note that the European Accessibility Act makes much of this legally required, which can raise severity of a finding to Blocker.
+- **Semantic elements**: `<button>` for actions, `<a href>` for navigation, lists as lists, landmarks
+  (`header`, `nav`, `main`, `footer`). A `<div onclick>` is invisible to keyboards and screen readers:
+  Critical, Blocker when it is the only route to a core task.
+- **Keyboard**: every action reachable and operable; tab order follows visual order (an opened mobile
+  menu placed before its toggle in the DOM breaks this); Escape closes overlays; arrow keys inside
+  menus, tabs and radio groups.
+- **Focus visible**: removing the outline without a `:focus-visible` replacement is a Blocker; the
+  indicator needs 3:1 against its surroundings and must not be clipped by `overflow: hidden` or hidden
+  under sticky headers (SC 2.4.11).
+- **Focus management**: opening a dialog moves focus in; closing returns it; removing an item moves
+  focus to a sensible neighbour; route changes move focus to the new heading.
+- **Names**: every interactive element has an accessible name; links make sense out of context; icons
+  inside named buttons are `aria-hidden`.
+- **Images**: meaningful images have alt text; decorative ones `alt=""`; charts have a text
+  alternative (a caption with the finding, or a data table).
+- **ARIA**: native elements first; state attributes (`aria-expanded`, `aria-pressed`,
+  `aria-current="page"`, `aria-sort`) kept in sync; `aria-live="polite"` for async status messages.
+- **Single-key shortcuts** (a bare "/" for search) need a way to turn them off or remap them, or to
+  work only when the control has focus (SC 2.1.4).
+- **Motion**: non-essential animation respects `prefers-reduced-motion`.
+- **Zoom and reflow**: usable at 200% zoom and 320px width; never disable pinch zoom.
+- **Standard and law.** Audit against WCAG 2.2 AA. The European Accessibility Act has applied since
+  28 June 2025 to many consumer-facing products and services in the EU (e-commerce, banking,
+  transport, e-books among them; microenterprises providing services are exempt). Its harmonised
+  standard is EN 301 549 (V3.2.1 maps to WCAG 2.1; V4.1.1, aligned with WCAG 2.2, was published in
+  September 2026). Where the Act applies, an accessibility failure on a core flow can be a Blocker.
+  Say this as a risk, not legal advice.

@@ -1,89 +1,106 @@
 # Worked Examples
 
-Read this file before producing the first report in a session. These anchor the finding format, severity judgement, and report shape. Match them exactly in structure; never copy their content into real reports.
+These anchor the finding format, severity judgement and report shape. Match their structure; never
+copy their content.
 
-## Example findings, one per severity
-
-### Blocker
-
-```
-**Found:** Global stylesheet sets `*:focus { outline: none }` (globals.css) with no focus-visible replacement anywhere in the app.
-**Why:** Keyboard users cannot see where they are; the app is unusable without a mouse and fails WCAG 2.4.7.
-**Fix:** Remove the global reset and add a visible default: `*:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }`. Override per component only with an equally visible alternative.
-**Prevent:** eslint-plugin-jsx-a11y will not catch CSS resets; add an axe-core Playwright check, which flags missing focus indicators at runtime.
-```
-
-### Critical
+## One finding per severity
 
 ```
-**Found:** `<div className="flex items-center gap-2"><Icon/><span>{user.name}</span></div>` in UserRow.jsx; the span has no `min-w-0`, so a 40-character username pushes the row wider than its container and breaks the card grid.
-**Why:** Any user with a long name breaks the layout for everyone viewing that list; flex children refuse to shrink below content size by default.
-**Fix:** `<span className="min-w-0 truncate">{user.name}</span>` and `flex-shrink-0` on the icon.
-**Prevent:** Playwright visual regression with a long-content fixture (200-char strings in seed data) catches every overflow of this family.
+**B1. Keyboard focus is invisible everywhere** (`styles.css:4`, all 23 focusable elements)
+**Found:** `*:focus { outline: none }` with no `:focus-visible` replacement; uicheck reports focus
+invisible on every focusable element at 1280px.
+**Why:** Keyboard users cannot see where they are, so the dashboard is unusable without a mouse (WCAG 2.4.7).
+**Fix:** Delete the reset and add `:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }`.
+**Prevent:** A CI grep that fails on `outline: none` without a `:focus-visible` rule (axe-core does not catch this).
 ```
 
-### Warning
-
 ```
-**Found:** Three card components use three radii: `rounded-lg` (StatsCard), `rounded-xl` (ChartCard), `rounded-2xl` (NewsCard), all rendered on the same dashboard.
-**Why:** Cross-component drift; the page reads as assembled from three different products and signals there is no token system.
-**Fix:** Pick one card radius (the design's `rounded-lg`), apply to all three, and move it into a shared Card component so the value has one owner.
-**Prevent:** Extract a `Card` primitive; once one component owns the style, drift becomes impossible.
-```
-
-### Polish
-
-```
-**Found:** `<h2 className="text-3xl font-bold">Track every market in one place</h2>` renders "place" alone on the second line at 1280px.
-**Why:** A widowed word weakens the heading's visual weight; classic AI-generated typography miss.
-**Fix:** Add `text-balance` to the heading classes.
+**C1. The page scrolls sideways on phones** (`.logo-strip`, 520px fixed width)
+**Found:** At 360px the document is 520px wide (uicheck overflow 160px); the whole page pans sideways.
+**Why:** Every phone visitor gets a broken, wobbling page on the first screen.
+**Fix:** `.logo-strip { width: 100%; flex-wrap: wrap; justify-content: center; gap: var(--sp-4) }`.
+**Prevent:** Playwright screenshots at 360px that fail when `scrollWidth > innerWidth`.
 ```
 
-Note the Prevent line is omitted when no tooling exists for the family (the Polish example), and never repeats a tool already recommended for the same family in the same report.
-
-## Example full-audit report shape (condensed)
+```
+**C2. Plan buttons sit at three heights** (`.plan` cards, 3 of 3)
+**Found:** "Choose plan" buttons start at 854, 957 and 1058px at 1280 (uicheck card_rows, spread 204px)
+because feature lists differ in length and nothing pins the footer.
+**Why:** Buyers compare plans across the row; a ragged button line makes the table look broken and
+slows the comparison.
+**Fix:** Let the plan grid own the rows: `.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+grid-template-rows: auto auto 1fr auto; gap: var(--gutter) }` and
+`.plan { display: grid; grid-row: span 4; grid-template-rows: subgrid }`.
+```
+(Card-row misalignment defaults to Warning; this one is Critical because the misaligned element is the
+primary CTA users compare.)
 
 ```
-# UI Audit: token analytics dashboard (4 components, code input)
-
-**Score:** 100 - (1x12) - (2x8) - (3x4) - (2x1) = 58/100
-**Verdict:** Do not ship (1 Blocker). After Blocker + Criticals: re-audit, projected ~86.
-**Top 3 priorities:** restore focus visibility (Blocker), add min-w-0 to all three text rows (Critical, one root cause), unify the timeframe selector so it controls all charts (Critical).
-
-## Blockers (1)
-[finding]
-
-## Critical (2)
-[findings]
-
-## Warnings (3)
-[findings]
-
-## Polish (2)
-[findings]
-
-## Clean
-Categories 1, 6, 7, 12 checked, no findings. Category 15 partially clean: tables pass, charts carry the two findings above.
-
-## Durable fixes
-1. Playwright visual regression at 360/768/1280 with long-content fixtures (prevents the overflow family, 3 findings here).
-2. axe-core run per screen (prevents the focus family).
+**W1. KPI values sit on two different lines** (`.tile`, row of four at 1280px)
+**Found:** "Timed slots over 90% full" wraps to two lines, pushing its value 20px below the other three
+(uicheck baselines, spread 20px).
+**Why:** The eye reads a row of values as one line; the dropped value looks like an error.
+**Fix:** Reserve two label lines (`.tile dt { min-height: 2lh }`) or use subgrid rows across the tiles.
 ```
 
-## Quick-review example (no score requested)
+```
+**P1. Single words alone on heading lines** (h1 at 1280px "plan"; two h2s at 360px)
+**Found:** uicheck widows: the hero headline ends with "plan" alone; "Everything accounts payable needs,
+in one / place" at 360px.
+**Fix:** `h1, h2, h3 { text-wrap: balance }` and `&nbsp;` between the last two words of the hero headline.
+```
 
-User pastes one button component and says "something feels off". Read the matching references (structure-typography, color-states-forms), respond with only the findings in severity order, severities stated, two sentences of summary, no report scaffolding:
+## Visual quality section (full audit)
 
 ```
-Two findings, both Warning-level.
+**Visual quality:** Competent but forgettable. Clean, accessible and consistent, but nothing on the
+page is specific to a data-freshness product; with another logo it could sell anything.
 
-**Found:** `hover:border-2` adds a border that does not exist in the default state, so the button grows 2px and shifts its row on hover.
-**Why:** State changes must not move layout; the jump reads as a glitch.
-**Fix:** Keep `border-2 border-transparent` in the default state and only change the color on hover.
+**W4. Visual design has no point of view** (whole page)
+Moves:
+1. Replace the abstract hero illustration with the product's lineage view: a stale table turning
+   amber, then red, with the alert that fires. It says what the product does in one glance.
+2. Set the headline at 56px with tight tracking and a balanced two-line break; keep body at 17px
+   so the scale has real contrast.
+3. Break the run of four identical centred sections: make "How it works" a full-width three-step
+   strip with real screenshots, and the integrations a dense logo grid.
+```
 
-**Found:** Label "Submit" on a newsletter form.
-**Why:** Buttons should name the outcome; "Submit" is system vocabulary.
+## Wiring line (static pages)
+
+```
+## Wiring to confirm
+Export CSV, pagination, the five nav links (href="#") and the newsletter form have no handlers or
+endpoints; confirm they are wired before launch (the form would be a Blocker if shipped unwired,
+because it shows "Subscribed" without sending anything).
+```
+
+## Report header (condensed)
+
+```
+# UI audit: operations dashboard
+**Score:** 100 − (1×12) − (3×8) − (4×4) − min(5, 2×1) = 46/100. **Verdict:** Do not ship (1 Blocker).
+**Profile:** SaaS / dashboard. **Checked:** uicheck at 360/768/1280, screenshots, keyboard walk,
+period selector exercised; Liberation Sans stood in for Inter.
+**Visual quality:** Inconsistent: three card radii and two grey families on one screen.
+**Top 3:** B1 restore focus visibility; C1 make the period selector change the figures; C2 add sign
+and arrow to every delta.
+```
+
+## Quick review
+
+User pastes one button and says "something feels off":
+
+```
+Two issues, the worse is a layout jump on hover.
+
+**W1. The button grows 2px on hover** (`.btn:hover { border: 2px solid }`)
+**Found:** The border exists only on hover, so the button and its row shift.
+**Why:** Movement on hover reads as a glitch.
+**Fix:** `border: 2px solid transparent` by default; change only the colour on hover.
+
+**P1. "Submit" names the mechanism, not the outcome**
 **Fix:** "Subscribe".
 
-Spacing, contrast, and states otherwise check out.
+Spacing, contrast and focus otherwise check out.
 ```

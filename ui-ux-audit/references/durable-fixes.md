@@ -1,28 +1,24 @@
-# Durable Fixes: Stop Bugs From Coming Back
+# Durable Fixes: stop failures coming back
 
-A finding fixed by hand returns the next time code is generated. A finding fixed by tooling stays fixed. In every full audit, end with the 1-4 tools that would prevent the largest failure families found. Phrase recommendations so a non-coder can act on them: each entry includes the exact instruction to give an AI assistant.
+A finding fixed by hand returns the next time code is generated; a finding fixed by tooling stays
+fixed. End each full audit with the one to three tools that would prevent the largest failure families
+found, matched to the stack. Many people using this skill direct AI tools rather than write code, so
+give each as the one-line instruction to paste into a coding assistant, not raw configuration.
 
-Many people using this skill direct AI tools rather than writing code by hand, so never dump raw config at them as a task; offer to set it up, or give the one-line instruction they can paste into their coding assistant.
-
-## Failure family to tooling map
-
-| Failure family (categories) | Tool | Instruction to give the AI |
+| Failure family (categories) | Tool | Instruction to give the assistant |
 |---|---|---|
-| Duplicate/conflicting/off-scale Tailwind classes (2, 10) | eslint-plugin-tailwindcss + prettier-plugin-tailwindcss | "Install and configure eslint-plugin-tailwindcss with no-contradicting-classname and enforces-shorthand enabled, and prettier-plugin-tailwindcss for class ordering. Make lint run before every commit." |
-| Accessibility violations in JSX: missing alt, labels, roles, click-on-div (5, 6, 9) | eslint-plugin-jsx-a11y (strict) | "Add eslint-plugin-jsx-a11y with the strict config and fix everything it reports." |
-| Runtime accessibility: contrast, names, focus order (4, 9) | axe-core via @axe-core/playwright (or Lighthouse a11y) | "Add an automated accessibility test that runs axe-core against every main screen and fails the build on violations." |
-| Visual drift and regressions: spacing, layout breaks at 360px, component drift (2, 8, 10) | Playwright screenshot tests | "Set up Playwright visual regression tests: screenshot each main screen at 360px, 768px, and 1280px and fail when pixels change unexpectedly." (Anthropic's webapp-testing skill covers this workflow.) |
-| Performance regressions: layout shift, slow load, oversized images (13) | Lighthouse CI + web-vitals | "Add Lighthouse CI with budgets: CLS under 0.1, LCP under 2.5s, and fail the build when exceeded." |
-| Token drift: raw hex values, magic numbers in components (10) | Centralized theme + lint guard | "Move every color, radius, and shadow into the Tailwind config (or CSS variables at :root), then add a lint rule or grep check that fails on raw hex values inside components." |
-| Hardcoded user-facing strings when i18n exists (14) | i18n lint (e.g. eslint-plugin-i18next) | "Add a lint rule that flags hardcoded user-visible strings in components so all copy goes through the translation files." |
-| Inconsistent number/date formatting across views (15) | Central formatter module (Intl.NumberFormat / Intl.DateTimeFormat wrappers) | "Create one formatting module for all numbers, dates, and currencies, and replace every inline toFixed or manual string with it." |
-| Type-level prop misuse, missing required props (5, 10) | TypeScript strict mode | "Turn on TypeScript strict mode and fix the errors; it catches missing/wrong props before they render." |
-| Broken interaction flows: forms, modals, keyboard paths (5, 6, 9) | Playwright functional tests | "Write Playwright tests for the critical flows: submit each form with valid and invalid data, open and close each modal with mouse and keyboard." |
+| Alignment and consistency drift: card rows, baselines, orphans, widows, control heights, radii, gutters (10) | This skill's `scripts/uicheck.py` in a pre-commit or CI step | "Run uicheck.py on every page before commit and fail when card_rows, baselines, control_heights, grid_orphans, nested_radius or heading widows are not empty." |
+| Layout breaks at 360px, visual regressions (2, 8, 10) | Playwright screenshot tests | "Add Playwright visual tests that screenshot each page at 360, 768 and 1280px with long-content fixtures and fail on unexpected changes." |
+| Runtime accessibility: names, contrast, landmarks (4, 9) | axe-core via Playwright | "Add an accessibility test that runs axe-core on every page and fails on violations." |
+| Removed focus rings (9) | A grep or stylelint rule | "Fail the build when CSS sets outline: none or outline: 0 without a :focus-visible replacement." (axe-core does not detect this.) |
+| Off-scale values, raw colours, one-off radii (2, 10) | Design tokens plus stylelint (plain CSS) or eslint-plugin-tailwindcss (Tailwind) | "Move every colour, radius, shadow, gap and control height into CSS custom properties at :root and add a lint rule that fails on raw hex values and off-scale pixel values in components." |
+| JSX accessibility: alt text, labels, click handlers on divs (5, 6, 9) | eslint-plugin-jsx-a11y (React only) | "Add eslint-plugin-jsx-a11y with the strict config and fix what it reports." |
+| Markup validity in plain HTML (9) | html-validate | "Run html-validate on every HTML file in CI." |
+| Layout shift and slow loads (13) | Lighthouse CI | "Add Lighthouse CI with budgets: CLS 0.1, LCP 2.5s; fail when exceeded." |
+| Inconsistent number and date formats (16) | One formatting module | "Create one module wrapping Intl.NumberFormat and Intl.DateTimeFormat and replace every inline toFixed or hand-built string with it." |
+| Broken flows: forms, dialogs, filters that do not filter (5, 6, 16) | Playwright functional tests | "Write Playwright tests that submit each form with valid and invalid data, open and close each dialog with mouse and keyboard, and check that each filter changes the figures it claims to change." |
 
-## Rules for recommending
-
-- **One recommendation per failure family**, attached to the report's Durable fixes section, not repeated under every finding.
-- **Proportionality.** A one-page prototype does not need the full battery; recommend the single highest-leverage tool. A pre-launch product (app store submission, paying users) justifies the visual-regression + a11y + Lighthouse trio.
-- **Order by leverage.** Recommend first whatever prevents the family with the most findings in this audit.
-- **Never recommend a tool you have not matched to the stack.** RN/Expo native screens use different tooling than web (e.g. jest + react-native-testing-library, Maestro for flows); say so rather than prescribing web tools that will not run there. Expo web targets can use the web tooling above.
-- **Close the loop.** When the same finding family appears in a second audit of the same project, escalate: the durable fix from last time was not installed, so installing it is now the top priority, above the individual fixes.
+Rules: one recommendation per failure family; proportionate to the project (a one-page prototype gets
+the single most useful tool); ordered by how many findings each would have prevented; never a tool
+that does not fit the stack. When the same family returns in a later audit, installing its tool
+becomes the top priority.

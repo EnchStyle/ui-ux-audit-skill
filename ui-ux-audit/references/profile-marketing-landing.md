@@ -1,57 +1,74 @@
-# Project Profile: Marketing / Landing Pages
+# Profile: Marketing and Landing Pages (including pricing)
 
-Conversion-focused public pages: home, product, pricing, campaign and feature landings. These exist to make a stranger understand a value and take ONE action. The reader is unconverted, impatient, often arriving on mobile from an ad. When this profile applies, the rules below OVERRIDE the universal defaults; everything not mentioned here keeps its universal rule. This profile is category-neutral about industry: for an actual storefront/checkout flow, switch to the e-commerce profile; for an app's internal UI, switch to that app's profile.
+Public pages whose job is to make a stranger understand a value and take one action: home, product,
+feature, campaign and pricing pages. The reader is unconverted, impatient and often on a phone. These
+rules override the universal defaults; everything else keeps its universal rule.
 
-Detection: landing/home/product/pricing/campaign routes, hero sections, marketing or sales copy, conversion CTAs and lead-capture/newsletter forms, "above the fold", "convert", "bounce rate", or the user saying so.
+Detection: hero sections, marketing copy, pricing tables, lead-capture or newsletter forms, routes
+such as /, /pricing, /product, /features, or the user saying so.
 
-Source of truth: the page has a single conversion goal — find it before auditing (the primary CTA, the form submit, the "what does this page want the visitor to do"). Audit every element by whether it advances that goal or distracts from it. If the goal is unclear from the page itself, that ambiguity is the first finding.
+Source of truth: find the page's single conversion goal first (the primary CTA). Judge every element
+by whether it advances that goal. If the goal is unclear from the page, that is the first finding.
 
-## Overrides: one value proposition, one primary CTA
+Simulation persona: a potential customer arriving from a search or an ad, on a phone, giving the page
+ten seconds to answer "what is this, is it for me, what do I do next".
 
-- **The above-the-fold must answer "what is this and why should I care" in one glance, then offer ONE primary action.** A hero with a clear headline, a sub that earns ~20 more words, and one dominant CTA. Severity for a missing/buried value prop or an invisible primary CTA: Critical.
-- **Competing primary CTAs dilute conversion.** Two equally weighted buttons ("Start free trial" AND "Book a demo" at identical emphasis) split intent. Pick one primary; demote the rest to secondary/ghost styling. Duplicate primary CTA intent: Warning (Critical if the page has three-plus equal CTAs above the fold).
-- **CTA repetition down the page is good, not drift** — the same labelled action repeated at section breaks is expected and not a consistency finding. What IS a finding: the repeated CTA using different labels for the same action ("Get started" / "Sign up" / "Try it now" all pointing at the same place). One label per action.
+## Overrides: one message, one action
 
-## Overrides: social proof must be real (ties to Category 14)
+- **The first screen answers what, for whom and what next**, at 1280 × 800 and 360 × 740: a headline
+  that says what the product does (two to eight words), a subline of about twenty words, one dominant
+  CTA. A vague headline that does not say what the product does is a Warning; nothing on the first
+  screen saying what it is, or an invisible primary CTA, is Critical.
+- **One primary CTA.** Two equally weighted primary buttons split intent (Warning; Critical with three
+  or more above the fold). Demote the rest to secondary styling.
+- **Same action, same label**: repeating the primary CTA down the page is correct; three labels for one
+  destination is a Warning.
+- **The CTA keeps its promise**: "Start free trial" leads to a trial, not a newsletter.
 
-- **Fabricated testimonials, fake logo walls, and invented precise stats are Critical here, not merely an aesthetic tell.** A marketing page's entire job is trust; faked trust signals are the worst possible failure on the highest-stakes surface. Specifically Critical: invented quotes with stock names/headshots, text-styled brand names posing as customer logos, and fake-precise numbers ("trusted by 12,400 teams", "3.2x faster") with no real source.
-- **Real logos only, logos only.** A logo wall contains actual brand marks the company can prove a relationship with — no category captions under each, no filler logos to pad the row.
-- **Stats come from real data, are labelled as sample/illustrative, or do not appear.** An unlabelled precise number on a marketing page reads as a claim and is treated as one.
+## Overrides: proof must be real
 
-## Overrides: performance is a conversion KPI, not a nicety
+- **Unsourced precise numbers, invented testimonials and faked product screens are Critical here**
+  (see `content-honesty.md`). What you cannot prove invented goes under Verify.
+- **Logo walls** hold real marks the company can show a relationship with, without captions under
+  each.
 
-- **A heavy unoptimised hero image/video or layout shift on load is Critical here, not Warning.** Slow LCP and visible CLS directly cost conversions and Core Web Vitals (an SEO ranking input), so they escalate one full level above their universal severity on this page type.
-- **Hero media is the LCP element — treat it as the most expensive thing on the page.** Flag: multi-MB unoptimised hero (no responsive `srcset`/`sizes`, no modern format, no compression), autoplaying background video with no poster, render-blocking fonts/scripts ahead of the hero. Provide the budget in the fix (e.g. hero under ~200KB, LCP under 2.5s, CLS under 0.1).
-- **Unsized hero/media that shifts the headline or CTA on load: Critical.** The CTA jumping under a visitor's cursor as the page settles is a conversion leak.
-- **Above-the-fold must be usable before the whole page loads** — the headline and CTA render and are clickable without waiting on below-fold assets.
+## Overrides: visual quality is part of the job
 
-## Overrides: copy is conversion (Category 14 applies in full, plus)
+- The page is the brand's flagship: rate visual quality and give moves in every audit
+  (`visual-excellence.md`). The AI default look on a landing page is a Warning that makes the brand
+  invisible; ground the replacement in the product.
+- **Section shapes vary**; the hero shows the product; one accent; one radius and shadow system; every
+  card row and plan row aligned (`alignment-consistency.md`). Plan cards whose buttons or prices sit
+  at different heights are Critical here because buyers compare them.
 
-- **Specific, benefit-led copy beats vague hype.** "Cut invoice approval from 3 days to 3 hours" beats "Streamline your workflow". Flag mock-profound filler ("crafted with intention", "elegantly simple", "the future of X"), unfalsifiable superlatives, and feature-listing where a benefit is what converts.
-- **Headline carries the value in ~2-8 words; the sub earns ~20 more.** If the value needs a paragraph, the value prop is unclear. Vague/clever-over-clear hero headline: Warning.
-- **Primary CTA labels name the outcome and never wrap at desktop.** "Start free trial", "Get the template" — not "Submit", "Learn more" on the primary action.
+## Overrides: pricing
 
-## Overrides: conversion dark patterns are Blockers
+- **Every price shows currency, billing period and VAT treatment** ("€24 per editor per month, excl.
+  VAT"). Missing period or VAT: Warning (one finding, even when an annual discount makes the basis
+  more confusing).
+- **The recommended plan is marked in text** ("Recommended"), not by colour or border alone (Warning).
+- **Discount arithmetic is correct**; struck-through prices are real prior prices.
+- **Urgency is real**: timers that reset and offers that never end are Blockers.
+- **A requested set of plan tiers** is not the "three identical cards" tell.
 
-These deceptive mechanics raise legal exposure (FTC, EU) and torch trust; on a conversion surface they are Blockers, not Critical:
+## Overrides: performance is conversion
 
-- **Forced continuity / sneaking:** free trial that silently bills with no clear price, term, or cancellation path stated before sign-up; pre-ticked upsell or consent boxes; items/add-ons slipped into the flow.
-- **Confirmshaming:** decline links that shame ("No thanks, I don't want to grow my business").
-- **Fake urgency:** countdown timers that reset on reload, "only 2 left" with no real inventory, "23 people viewing" fabricated activity, perpetual "sale ends today".
-- **Hidden cost / drip pricing:** the real price only appearing at the final step.
-Flag the mechanic by name and state the honest alternative.
+- **Unsized hero media or layout shift on load: Critical** (the CTA moving under the cursor).
+- **The hero image is the largest paint**: modern format, responsive `srcset`, `fetchpriority="high"`,
+  budget about 200 KB; no autoplaying background video without a poster.
+- Headline and CTA render and work before below-the-fold assets load.
 
-## Overrides: lead-capture and signup forms minimise friction
+## Overrides: lead forms
 
-(Universal form rules from Category 6 still apply; these tighten them for conversion.)
+- **Only the fields the conversion needs** (email alone for a newsletter). Extra fields: Warning;
+  Critical when they gate the page's only conversion.
+- **Visible labels, inline errors, a visible success state**; the submit button names the reward ("Get
+  the guide").
+- An unwired form on a static page goes under Wiring to confirm, flagged as a Blocker if shipped as is.
 
-- **Only fields that are genuinely necessary to convert.** Every extra field drops completion. A newsletter capture asking for name + company + phone when it needs only an email is a friction finding (Warning; Critical if it gates the page's sole conversion goal).
-- **Visible labels, never placeholder-as-label** (Critical, as universal) — doubly enforced because marketing forms are the most frequent offenders.
-- **Inline validation on blur, errors in text below the field**, success state on submit; never a silent or dead-end submit. A form with no error/success state on the page's primary conversion action: Critical.
-- **The submit button names the reward, not the chore:** "Get my free guide", not "Submit".
+## Reminders
 
-## Reminders (universal rules that marketing pages routinely fail — same severity, just commonly missed)
-
-- **Accessibility applies in full.** Marketing pages habitually ship decorative-only contrast, image-only text in heroes, keyboard-untraversable nav/menus, and missing alt text. Hold them to the universal a11y bar; do not relax it because the page is "just marketing".
-- **Mobile-first / responsive is load-bearing** — a large share of marketing traffic is mobile. Verify the hero, headline, and primary CTA at 360px: no horizontal scroll, CTA reachable without scrolling past distractions, no two-line nav. A hero broken or CTA pushed off-screen at 360px is Critical (common-viewport break).
-- **The generic-AI aesthetic is endemic here — apply Category 14 hard.** Centered hero over a purple gradient blob, three identical feature cards, an eyebrow label above every section, a stock-y hero photo, scattered infinite micro-animations: on a brand's flagship surface these make the brand invisible. Flag per Category 14 and ground the replacement in this product's actual subject and audience, not a style lecture.
+- Accessibility applies in full: marketing pages habitually ship low-contrast text on gradients and
+  navigation that keyboards cannot open.
+- Navigation fits one line at every desktop width shipped; on phones, hiding section links is fine
+  when the primary CTA and essential destinations (sign in, pricing) stay reachable.

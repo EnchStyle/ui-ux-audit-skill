@@ -1,56 +1,72 @@
-# Project Profile: E-commerce / Online Storefront
+# Profile: E-commerce Storefronts and Checkout
 
-Online retail surfaces: product listing/category grids, product detail pages (PDP), cart, and checkout. Any stack. When this profile applies, the rules below OVERRIDE the universal defaults in the other reference files; everything not mentioned here keeps its universal rule.
+Product listings, product pages, basket and checkout. These rules override the universal defaults.
 
-Detection: routes or components named product/products/catalog/category/collection/cart/basket/checkout/shop/store; product grids or cards; price, add-to-cart, variant/option pickers, or quantity steppers; a checkout step machine; or the user saying so.
+Detection: product grids or cards, prices, add-to-basket buttons, variant pickers, quantity steppers,
+basket or checkout routes, or the user saying so.
 
-Source of truth: when the repo is available, read the design-token/theme files, the product-card and price components, and any cart/checkout state machine before auditing. This profile describes the patterns; the config and the card component hold the exact values. If they conflict, the code wins and the conflict is itself a finding. Localization: storefronts almost always sell across regions, so the Category 14 localization checks apply at Warning minimum, with currency, tax, and address formats stress-tested per target locale.
+Source of truth: the theme tokens, the product-card and price components, and the basket and checkout
+state logic when available. Storefronts usually sell across regions, so locale checks for currency,
+tax and address formats apply at Warning minimum.
 
-## Overrides: price, availability, and trust (the money-clarity bar)
+Simulation persona: a shopper on a phone, one-handed, comparing two products and checking the total
+before paying.
 
-- **Price is never ambiguous or hidden.** The price a buyer pays is visible before any add-to-cart, in the buyer's currency, with tax-inclusion stated where the locale expects it (EU prices are tax-inclusive). A buried, unparseable, or per-unit-vs-total-confused price is Critical.
-- **No surprise fees late in checkout.** Shipping, taxes, and mandatory surcharges are disclosed before the final pay step, not sprung on the review screen. Revealing real cost only at the end is a dark pattern and a Blocker (ties to Category 14 dark patterns).
-- **Stock state is explicit and honest.** In-stock / low-stock / out-of-stock / back-order each read unambiguously; an out-of-stock item never shows an active add-to-cart that fails after the tap. Misleading availability is Critical.
-- **Scarcity and urgency cues must be truthful.** "Only 2 left" or a countdown must reflect real inventory/real deadlines. Fabricated or resetting countdowns and fake low-stock counters are dark patterns: Blocker.
-- **Trust signals must be genuine.** Secure-payment, returns/refund, and review/rating components reflect real policy and real data. Fabricated reviews, invented star counts, or stock testimonials presented as real are Critical and tie to Category 14 fake-content.
-- **Sale pricing is honest.** A struck-through "was" price is a real prior price, not an inflated anchor; discount math (percent off, "save X") is correct.
+## Overrides: price and availability clarity
 
-## Overrides: product card consistency across the grid
+- **The price paid is visible before adding to basket**, in the buyer's currency, with tax treatment
+  where the locale expects it (EU prices include VAT). Ambiguous or hidden price: Critical.
+- **No surprise costs at the last step**: shipping, tax and surcharges disclosed before payment
+  (Blocker if revealed only at the end).
+- **Stock state is honest**: an out-of-stock option never keeps an active add-to-basket that succeeds
+  (Critical).
+- **Scarcity and urgency are real** (Blocker if fabricated).
+- **Sale prices are honest**: the struck-through price is a real prior price; the percentage matches
+  the arithmetic (Critical if not).
 
-- **Cards in a grid are uniform.** Image aspect ratio, title line-count/truncation, price position, badge placement, rating slot, and CTA must be identical cell to cell. Drift (one card taller, one price lower, one badge floating) is Warning, escalating to Critical if it breaks grid alignment at a common viewport.
-- **Variable content is bounded.** Long titles clamp to a fixed line count (`line-clamp-2`) with `min-w-0`; missing rating/badge/discount collapses to reserved space, not a shifted layout. The card renders cleanly with the longest title, no rating, no badge, and the longest price string.
-- **Badges are a fixed vocabulary in fixed slots.** "Sale", "New", "Low stock" use one badge system, one corner, one z-order; never overlap the image focal point or each other.
+## Overrides: grid and card consistency
 
-## Overrides: product imagery and media
+- **Every card in a grid shares one anatomy**: image ratio, title line count, price position, badge
+  slot, rating slot, button line (`alignment-consistency.md`). Drift is a Warning; Critical when it
+  breaks the grid at a common width.
+- **Bounded content**: titles clamp to a fixed line count; missing ratings or badges keep their
+  reserved space.
+- **Badges** use one vocabulary in one corner and never cover the product's focal point.
+- **Catalogue grids** may end with a partial last row; that is not an orphan finding.
 
-- **Every product image has explicit dimensions or a locked aspect ratio.** Grids load many images; unsized images shifting the grid on load is Critical (cumulative layout shift). Reserve the box, lazy-load below the fold, and prioritize the first viewport / the PDP hero.
-- **Gallery and zoom states are complete.** The PDP gallery has thumbnails with a clear selected state, a working zoom/lightbox, keyboard navigation, and a sensible single-image and no-image fallback. A zoom with no escape or no focus management is a Blocker.
+## Overrides: media and variants
 
-## Overrides: variant and option pickers
+- **Product images have fixed dimensions or aspect ratios** (layout shift on a grid is Critical).
+- **The gallery**: clear selected thumbnail, keyboard navigation, a zoom with an escape, a no-image
+  fallback.
+- **Selected variant is shown by more than colour** (border plus check, `aria-pressed` or radio
+  semantics): colour-only selection is Critical.
+- **Unavailable variants are visibly disabled with the reason in text**; selecting a variant updates
+  price, image and stock together.
+- **Quantity steppers** enforce limits and accept typed values.
+- **Swatches, size buttons and quantity steppers are primary controls on phones**: 44px targets.
+  Smaller (24 to 43px) is a Warning; below 24px without spacing, Critical.
 
-- **Selected state is unmistakable and accessible.** Size/color/material pickers show the active option with more than color alone (border + check/inset, plus `aria-pressed`/radio semantics); a color-only selected state is Critical.
-- **Availability is reflected per option.** Unavailable variants are visibly disabled (not hidden), with the reason conveyed in text, not just a faded swatch. Selecting a variant updates price, image, and stock atomically.
-- **Quantity steppers validate.** Min/max enforced, non-numeric rejected, the value editable directly, and out-of-stock quantities blocked before add-to-cart, not at checkout.
+## Overrides: basket and checkout (the strictest bar)
 
-## Overrides: cart and checkout (the highest-stakes path)
+- **A confusing or broken checkout step is a Blocker.**
+- **Progress and a way back** on every step, without losing entered data or basket contents.
+- **Guest checkout** exists unless the brief justifies an account (Critical if missing).
+- **Inline field errors in text**, focus to the first error, input preserved.
+- **Every state built**: empty basket with a route back, item removed with undo, payment declined,
+  address invalid, shipping unavailable, coupon invalid, and a pay button that cannot be pressed twice
+  (double charge risk is a Blocker).
+- **Correct autocomplete** tokens for names, addresses and cards.
 
-- **A broken or confusing checkout is a Blocker, not a Warning.** This is the conversion path and the money path; hold it to the strictest bar in the audit.
-- **Every step shows progress and a way back.** A visible step indicator, and a return path to a prior step or the cart that never silently discards entered data or the cart contents. Losing the cart on back-navigation is a Blocker.
-- **Guest checkout exists.** Forcing account creation before purchase is a documented conversion killer; treat a mandatory-account wall with no guest path as Critical unless the brief justifies it.
-- **Validation errors sit at the field, inline, in text.** Per-field messages on blur and on submit, focus moved to the first error, and the failed field never silently cleared. Errors in color alone, a single top-of-form summary with no field anchor, or a wiped form on error are Critical (ties to Forms, Category 6).
-- **All cart/checkout states are built, not just the happy path:** empty cart (with a route back to shopping, distinct from a loading skeleton), item removed/undo, payment-declined, address-invalid, shipping-unavailable-to-region, coupon-invalid, and the in-flight/disabled submit state that prevents double-charge. A missing empty or error state on this flow is Critical; a double-submittable pay button is a Blocker.
-- **Cart persists.** Cart contents survive reload and, for signed-in buyers, across sessions and devices; an anonymous cart is not silently dropped on sign-in (it merges). Silent cart loss is Critical.
-- **Address and payment fields use correct input affordances.** `autocomplete` tokens (name, address-line, postal-code, cc-number with `inputmode`/`autocomplete="cc-*"`), country-appropriate address shape and postal/state labels, and never a placeholder as the only label.
+## Overrides: phone first
 
-## Overrides: mobile-first (retail traffic is mostly mobile)
+- A layout that works only at desktop is a Critical responsive failure.
+- On product pages, add to basket stays within reach on phones (sticky bar or near the top); stranded
+  far below the fold is a Warning.
+- Filters and sort open in an accessible sheet with a visible applied count and "clear all".
 
-- **Design and audit the phone viewport first.** Most storefront traffic is mobile; a layout that only resolves at desktop is a Critical responsive failure, not a Warning.
-- **Primary actions are thumb-reachable and sticky where it counts.** A sticky add-to-cart on the PDP and a sticky/persistent checkout CTA in cart, within the bottom thumb zone, not stranded above a long fold.
-- **Filters and sort are reachable on mobile** via an accessible sheet/drawer with a visible applied-filter count and a clear-all; an off-canvas filter that traps focus or has no close is a Blocker.
+## Content
 
-## Aesthetic and content notes (storefront-specific)
-
-- Lead with the real product, not template furniture: a category page's job is scannable, comparable, honest cards, not a hero gradient and three icon feature cards (Category 14 generic-AI tells still apply).
-- Photography is real product imagery or an honestly labeled placeholder slot; never div-built fake product shots or stock images implying they are the item.
-- Review counts, ratings, and "bestseller"/"trending" labels come from real data or do not appear (Category 14 fake-content).
-- Copy: buttons name the outcome ("Add to cart", "Place order", "Continue to payment"), one term per concept ("cart" vs "bag" vs "basket" picked once), and order/error states say what happened and the next step. Confirmshaming on declines/unsubscribes and pre-ticked marketing or insurance add-ons are dark patterns (Blocker).
+Real product photography or honestly labelled placeholders; ratings, review counts and "bestseller"
+labels from real data; buttons that name the outcome ("Add to basket", "Pay €89.00"); one term for the
+basket throughout.
