@@ -15,7 +15,7 @@
 - **Evidence for the eye:** close-ups at twice the size, one sheet per width, and a screenshot of every scroll area scrolled to its end.
 - **Changes to an existing page:** `uicheck.py --baseline` compares with the page before the change; build mode measures before and after, also for small repairs, and has rules for a house style sheet laid over an existing page and for text that only screen readers get.
 - **Tests:** `tests/` holds five acceptance tests with their pages (`python3 tests/run_tests.py`).
-- **Corrections** to four factual statements, listed in the test report.
+- **Corrections** to four factual statements: lists of links are not covered by the inline exception to the 24px target rule; relative luminance uses the threshold 0.04045; EN 301 549 is given with both its cited version (3.2.1) and the newer one; subgrid support is dated (every major browser since September 2023).
 - Test results in the README. Audits: 584 of 585 planted defects found over 40 runs, no finding on the clean page. Builds: preferred to 2.0.0 builds in 44 of 54 blind judgements.
 
 ## 2.0.0 (2026-09-26)
