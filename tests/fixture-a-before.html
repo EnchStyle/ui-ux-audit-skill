@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Switch in a side panel, before the padded box</title>
+<style>
+/* Test page for uicheck.py: a two-option switch in a 420px side panel that clips. The house font, Arial Nova, is
+   normally not installed where the script runs; with a wider font the switch no longer fits the padded box. */
+*{box-sizing:border-box}html,body{margin:0;height:100%}body{font:15px/1.45 "Arial Nova", Arial;color:#16181d;background:#f3f4f6}
+main{margin-left:420px;padding:32px 40px}h1{font-size:26px;margin:0 0 12px}h2{font-size:17px;margin:0 0 12px}p{margin:0 0 12px}
+.side{position:fixed;top:0;left:0;bottom:0;width:420px;overflow:hidden;background:#fff;border-right:1px solid #d9dce2;padding:24px 20px}
+.callout{padding:16px 24px;font-weight:700;background:#eef4ea;border-left:4px solid #2e7d32;border-radius:6px;margin:0 0 16px}
+.field-label{display:block;margin:0 0 8px;font-size:13px;color:#555b66}
+.seg{display:inline-flex;padding:4px;background:#e6efe2;border-radius:10px}
+.seg button{font:inherit;border:0;background:transparent;color:#16181d;padding:10px 16px;border-radius:7px;white-space:nowrap;cursor:pointer;min-height:44px}
+.seg button[aria-pressed=true]{background:#111;color:#fff}
+.seg button:focus-visible{outline:2px solid #1d4ed8;outline-offset:2px}
+</style></head><body>
+<aside class="side" aria-label="Settings">
+<h2>Notifications</h2>
+<span class="field-label" id="show-label">Show notifications for</span>
+<div class="seg" role="group" aria-labelledby="show-label"><button type="button" aria-pressed="true" lang="lt">Gautoms ir išsiųstoms</button><button type="button" aria-pressed="false" lang="lt">Tik gautoms</button></div>
+<p>The choice applies at once.</p>
+</aside>
+<main><h1>Parcel notifications</h1><p>Test page: a side panel with a two-option switch.</p></main>
+<script>document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)))));</script>
+</body></html>

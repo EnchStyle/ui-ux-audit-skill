@@ -1,115 +1,134 @@
-# Category 14: Visual Quality and Distinctiveness
+# Visual quality: what separates professional design from AI output and templates
 
-The bar is a page that a design-literate person remembers and trusts: distinctive, precise and clear.
-Clear comes first. Distinctive never excuses a slower read, a weaker hierarchy or a less honest chart.
+The bar is a page that a design-literate person trusts and remembers: clear first, then specific, then
+precise. Distinctive never excuses a slower read, a weaker hierarchy or a less honest chart.
 
-## Rate it (every full audit of a landing page, dashboard or analytics page)
+Professional work differs from generated and templated work in eight ways that can be checked. Each is a rule
+to build by and a check to audit with. They are what "looks expensive" is made of: nothing here is decoration.
 
-| Rating | What it looks like | Landing and marketing pages | Dashboards, reports, shops, apps |
-|---|---|---|---|
-| **Exceptional** | A clear idea specific to this product, executed with precision; nothing to add | No finding | No finding |
-| **Distinctive with slips** | A real idea, but execution slips (alignment, rhythm, one-off values) | The slips as their own findings | Same |
-| **Competent but forgettable** | Correct and tidy, but no idea: swap the logo and it could be any product | Warning: "Visual design has no point of view", moves in the Fix | Rating and moves in the Visual quality section, unscored |
-| **Generic template** | The AI default look (tells below) regardless of subject | Warning: name the tells, moves in the Fix | Rating and moves in the Visual quality section, unscored |
-| **Inconsistent** | Several systems on one page: radii, greys, type scales, card styles | The consistency findings (Category 10) | Same |
+## The eight checks
 
-For dashboards and reports, distinctiveness never outranks clarity: the verifiable hierarchy faults
-(no dominant answer, twelve equal tiles, chrome louder than the data) are ordinary findings, and the
-aspirational moves are advice.
+| # | Professional work | Build rule | Audit check (measure) | Code |
+|---|---|---|---|---|
+| 1 | **Restraint** | Every visual element has a job (group, rank, signal state, show the product). At most one large gradient, no glow shadows, no emoji as icons, a badge only where there is a status, blur only on a floating layer | Decoration census from `uicheck.py`: `large_gradients` above 1, `glow_shadows` above 0, `emoji_in_interface` above 0, `blur_surfaces` on content, pills on more than a third of cards | `decoration`, or a tell for `visual-generic` |
+| 2 | **A clear focal point** | One thing per screen is clearly the largest or strongest: the headline, the key figure or the product. The next thing is clearly smaller | "First screen: largest text" from the script: the largest is at least 1.3 times the next size. On dashboards: not more than six equal tiles with nothing larger | `hierarchy-flat` |
+| 3 | **Deliberate white space** | Space comes from the scale; space inside a group is smaller than space between groups; sections share one rhythm | `section-rhythm`, `gutter-drift`, `heading-proximity`, `pad-asymmetry` | those codes |
+| 4 | **A tight type system** | At most two families and one monospace; six or seven sizes from one scale; two or three weights; text lines of 45 to 90 characters | Census: families, weights, number of sizes; `type-scale-drift`; `line-length` | those codes |
+| 5 | **Optical alignment** | Shared left edges; values on one baseline; matching parts of cards on one line; icons centred on the text beside them; concentric corners | `edge-near-miss`, `tile-baseline`, `card-rows`, `radius-nested`, `icon-sizes`; look at icon and text pairs on the screenshot | those codes |
+| 6 | **Consistent detail at small sizes** | One border weight, one icon stroke and size per role, one radius per component type, one control height per size, one focus ring | Census: radii, shadows, icon strokes; `control-heights`, `chip-heights`, `radius-drift`, `shadow-drift` | those codes |
+| 7 | **Real content** | The actual product, real or computed numbers, specific words. Sample data is labelled. No lorem ipsum, no invented customers, quotes or logos, no grey boxes | `placeholder-content` from the script; read every claim | `placeholder-content`, `unsourced-claim` |
+| 8 | **Considered empty and edge states** | Loading, empty, error and long content are designed, not left to chance | `--states` run; click census flags; the longest value on the page still fits | `state-empty`, `state-error`, `text-clipped`, `text-spill` |
 
-A rating always comes with two to four **moves**: concrete changes grounded in this product's
-subject, audience and content, each small enough to act on. "Make it more premium" is not a move;
-"lead the hero with the live freshness monitor from section 3, at full width, and cut the three icon
-cards to a single annotated screenshot" is.
+In build mode, go through the eight after the script is clean and fix anything a check shows, then go through
+Depth and finish below. In an audit they are not extra findings: each maps to registry codes that the registry
+pass already covers.
 
-## What high-end looks like
+## Depth and finish (build mode)
 
-1. **One idea, carried through.** A signature grounded in the product: a live product component in
-   the hero, the real data as the main visual, a distinctive typographic system, a precise grid with
-   a strong structural motif. One idea, repeated with discipline, beats five decorations.
-2. **Typographic contrast and voice.** A clear scale (ratio about 1.25 to 1.333) with a display size
-   meaningfully larger than body; weight contrast; tighter tracking on large display type; generous
-   leading for reading; line length 60 to 75 characters; tabular figures in data. At most two
-   families, each with a job. Emphasis inside a headline uses the same family (italic or weight), not
-   a stray serif word.
-3. **Colour with restraint and intent.** A tinted neutral base that matches the brand's temperature,
-   one accent reserved for action and the key data, semantic colours kept for meaning. Dark themes
-   designed, not inverted: dark grey base, lighter surfaces for elevation, desaturated accents.
-4. **Composition and rhythm.** A visible grid; sections that vary in shape (split, full-bleed,
-   stacked narrative, dense data) instead of the same centred stack repeated; one vertical rhythm;
-   asymmetry only where it has a reason; space used for grouping before boxes and borders.
-5. **Craft in the details.** Shared edges, concentric corners, one control height, no orphans, no
-   widows, balanced headings, optical alignment, real states. Details are where "expensive" is
-   perceived (`references/alignment-consistency.md`).
-6. **Real content.** The actual product, real numbers, specific copy. Illustrative data is labelled as
-   such. Nothing faked (`references/content-honesty.md`).
-7. **Data as the hero** (dashboards and analytics). One primary answer per view; chart titles that
-   state the finding; direct labels instead of legends; muted grids and axes so the data carries the
-   ink; comparison built in (versus target, prior period, plan); annotations that explain spikes;
-   small multiples instead of rainbow spaghetti.
-8. **Motion with a job.** One orchestrated entrance, fast responsive feedback, nothing looping for
-   attention; all of it honours reduced motion.
+Restraint removes ornament, never information. In this skill's blind comparisons (pairs of pages built from one
+brief, judged on which looks more professional and more expensive) the plainer page lost almost every time. The
+winner carried more real detail, every piece of it doing a job. Seven things decided it. Plan them before the
+code and check them at the end on the full-page screenshots:
 
-## Brand systems and house templates
+1. **Every section shows something.** A feature is shown as a small view of the product doing that job (the
+   invoice as the customer receives it, the map with the parcel on it), a step as its screen, a result as a chart or a ruled
+   figure. A heading with paragraphs, or numbered text alone, reads as unfinished. A method note, a list of
+   questions and legal text are the exceptions.
+2. **No band is half empty.** At 1280 the content of every band reaches across its grid, text beside its view.
+   When half the width is empty, add the supporting piece, or narrow the column and centre it.
+3. **The answer leads.** A dashboard or a report opens with the answer as the largest thing on the screen
+   ("7 of 40 deliveries are late") and its parts beside it as figures in the status colours. Filters sit
+   below the answer in one quiet row.
+4. **One view is made for this data.** The main view follows the shape of the data: things in time become a
+   timeline with now marked, things in places a map or a plan, parts of a whole one divided bar, stages a
+   sequence, a level a gauge against its limit. A table or a list of cards alone is the fallback and comes last.
+5. **One strong contrast.** One dark or saturated full-width band (the hero, the proof or the closing call)
+   against the page ground, and one accent that keeps one meaning.
+6. **Status is designed.** Every state (ready, late, waiting) has one mark used everywhere, a pill or a ruled
+   label, always with its word. States that need action carry the status colours; routine states stay
+   neutral, so that colour keeps its meaning. This is information, not a badge to cut.
+7. **Nothing looks unfinished.** No dashed outline or grey box standing for a picture, no empty cells, no date
+   field or select left in the browser's default look (keep it native, style it with the tokens), no "sample"
+   tag on every row (say it once per screen), no cut-off value, no button alone on a line, no heading or
+   caption ending in one orphan word, no heading pressed against the band above it, no pale outline standing
+   for a value in a chart (data marks are solid).
 
-When the project has a brand system, design tokens or a house template (a corporate report template,
-say), its fonts, colours and components are fixed. Audit execution within it and raise quality
-through hierarchy, rhythm, alignment, data-ink, chart grammar and copy. Never propose new brand
-colours or fonts; propose better use of the ones that exist. A deviation from the house system is
-itself a finding.
+Clear a script candidate by repairing the element, never by deleting the detail it sits in: a page that passes
+because it holds less is the plain page that loses.
 
-## The AI default looks (flag when unjustified by the brief)
+## Template tells (count them for the rating)
 
-- Violet or indigo gradients, glowing purple CTAs, blurred mesh blobs behind a centred hero.
-- Centred hero over a gradient with a big-number stat row; three identical icon feature cards; a
-  small uppercase eyebrow label above every section; numbered 01/02/03 markers on things that are not
-  a sequence.
-- Glassmorphism as the default surface; scattered infinite micro-animations.
-- An unconsidered default typeface and slate greys where the brand wanted personality.
-- The generic SaaS look: system sans, white rounded cards on a light grey page, one saturated button
-  colour, numbered section chips, every section the same centred stack. Clean, and indistinguishable
-  from a thousand others.
-- The "premium" defaults swapped in for each other: warm cream with a display serif and terracotta,
-  near-black with one acid accent and monospace labels, hairline broadsheet columns. Each is fine when
-  the subject calls for it; as a reflex it makes every brand invisible.
+A tell is counted when it is present and the brief or brand does not ask for it:
 
-Report the pattern, why it reads as templated, and the replacement grounded in this product. "This is
-generic" is not a finding; "centred gradient hero plus three icon cards is the template answer; for a
-freshness monitor, lead with the product's own lineage view showing a stale table turning red" is.
+1. A violet, indigo or blue-to-purple gradient, a glowing button, or blurred colour blobs behind a centred hero.
+2. A centred hero followed by a row of three or four identical icon cards.
+3. A small uppercase label above every section heading (the census counts them).
+4. Numbered 01, 02, 03 markers on things that are not a sequence.
+5. Glass or blur as the default surface for content.
+6. Looping decorative animation.
+7. Emoji used as icons.
+8. A default typeface with no decision behind it together with slate greys (system sans on white rounded cards
+   on a pale grey page with one saturated button colour).
+9. Every section the same shape: the same centred stack or the same card grid three or more times in a row.
+10. A library's untouched default theme (default chart colours and fonts, stock button blue).
+11. A "premium" costume worn with no reason in the subject: cream with a display serif and terracotta,
+    near-black with an acid accent and monospace labels.
+12. A badge, pill or tag on most cards that states no status (a status pill on an order, a ticket or a delivery
+    is information).
 
-## Moves library
+Three or more tells: "Generic template" (on a landing page this is the one scored finding, `visual-generic`).
+Fewer, with no designed element made for this product: "Competent but forgettable", which is advice and never
+scored. The rating rules are in SKILL.md. A page that follows one style from
+`style-library.md` consistently is not generic because of that style's own conventions.
+
+## Moves (two to four with every rating)
+
+A move is a concrete change grounded in this product's subject, audience and content, small enough to act on.
+"Make it more premium" is not a move; "lead the hero with the live freshness monitor from section 3, at full
+width, and cut the three icon cards to one annotated screenshot" is. When a landing page has the `visual-generic` finding, the moves go in its Fix.
 
 ### Landing pages
-- **Product-led hero.** Show the product doing its job: a real screenshot, a working mini-component,
-  or real output. Replace abstract illustrations and gradient blobs.
+- **Product-led hero.** Show the product doing its job: a real screenshot, a working mini-component, or real
+  output. Replace abstract illustrations and gradient blobs.
 - **Headline says what it does and for whom** in two to eight words; the subline adds about twenty.
-- **A typographic signature.** Large display size with tight tracking and a deliberate line break
-  (balanced), set against quiet body text.
-- **Vary section shapes.** Follow a split hero with a full-bleed proof band, then a stacked narrative,
-  then a dense comparison. Never three identical centred sections in a row.
+- **A typographic signature.** A large display size with tight tracking and a deliberate, balanced line break,
+  against quiet body text.
+- **Vary section shapes.** Follow a split hero with a full-width proof band, then a stacked narrative, then a
+  dense comparison.
 - **Proof with specifics.** Real customer names and outcomes with sources, or none.
-- **One accent, one primary action**, repeated with the same label at natural break points.
+- **One accent, one main action**, repeated with the same label at natural breaks.
 
 ### Dashboards
 - **One primary metric dominant**; supporting tiles smaller and quieter.
-- **Group by the question** the user asks ("Are we on track?", "What needs attention?"), not by data
-  source.
+- **Group by the question** the user asks ("Are we on track?", "What needs attention?"), not by data source.
 - **One tile anatomy**: label, value, change with sign and basis, timeframe, in fixed positions.
-- **Fewer boxes.** Use spacing, alignment and a subtle surface change instead of borders around
-  everything.
-- **Status colour sparingly** so red means something; neutral when on track.
+- **Fewer boxes.** Spacing, alignment and a subtle surface change instead of borders around everything.
+- **Status colour sparingly** so that red means something.
 - **Freshness visible** ("Updated 14:32").
 
 ### Analytics reports and data pages
-- **Headline every figure with its finding** ("Parcel volume fell 6% in August") and put the neutral
-  description in the caption.
-- **One chart grammar**: same axis style, gridlines, fonts, number formats, and the same colour for
-  the same series in every figure.
+- **Headline every figure with its finding** ("Parcel volume fell 6% in August"); the neutral description goes
+  in the caption.
+- **One chart grammar**: the same axis style, gridlines, fonts, number formats and series colours in every figure.
 - **Key numbers in tiles that match the text and tables exactly.**
 - **Annotate** the events that explain the data; show targets and prior periods as reference lines.
-- **Method and sources** in a short, visible note; print-friendly layout.
+- **Method and sources** in a short, visible note; a layout that prints.
+
+### Apps
+- **One title, one main action per screen**; system-like controls; the same token block on every screen.
+- **Thumb-sized targets with air between them**; the main action in the lower half.
 
 ### Any page
-- Tighten to the global system: one radius scale, one gutter, one control height.
+- Tighten to the system: one radius scale, one gutter, one control height.
 - Remove one decorative element for every one you add.
 - Make the first screen answer "what is this and what do I do" before anything else.
+
+## Where the eight come from
+
+Restraint and focus: "aesthetic and minimalist design" among Nielsen's heuristics (extra elements compete with
+the ones that matter). Type: Butterick's key rules (body 15 to 25px, 45 to 90 characters, 120 to 145% line
+spacing, few typefaces) and Apple's typography guidance (few typefaces, no thin weights). Consistency at small
+sizes and optical alignment: the token and grid discipline shared by the design systems cited in
+`style-library.md`. Real content and states: Apple's Loading guidance and the error-message guidelines cited
+in `usability.md`. Depth and finish comes from the reasons blind judges gave when comparing pairs of
+builds made with and without this skill; the figures are in the skill's test report.

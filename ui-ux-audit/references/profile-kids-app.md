@@ -1,10 +1,14 @@
 # Profile: Children's Learning App (ages 4 to 9)
 
+Severities are set only in `severity-registry.md`; the codes in brackets below are its rows.
+
 Touch-first learning and reading apps for young children, with parent-facing settings. These rules
 override the universal defaults; everything else keeps its universal rule.
 
 Detection: child-facing learning, reading or spelling screens, reward and streak mechanics, parent
 gates, large tiles and mascots, or the user saying so.
+
+Main task: the child completes the learning activity on the screen without help.
 
 Source of truth: the project's theme and token files and any design-system notes. When the profile and
 the project's config disagree, the config wins, and the disagreement is itself worth mentioning.
@@ -15,10 +19,10 @@ taps imprecisely; a parent on a phone with thirty seconds between tasks, for set
 ## Overrides: touch
 
 - **Primary game and learning targets 56 to 64px; everything else 48px minimum**, with 12 to 16px
-  between targets. Below these floors: Critical.
+  between targets. Below these floors `target-touch` is Critical on this profile.
 - **Every tap gives physical feedback** and game actions are protected from double-firing.
 - **Game surfaces** set `touch-action: manipulation` and `user-select: none` so rapid or long taps do
-  not zoom, select or open callouts (Polish when missing: modern mobile browsers already suppress
+  not zoom, select or open callouts (`other`, Polish when missing: modern mobile browsers already suppress
   most double-tap zoom).
 
 ## Overrides: type and reading
@@ -28,15 +32,15 @@ taps imprecisely; a parent on a phone with thirty seconds between tasks, for set
 - **Unambiguous letterforms**: single-storey "a" and "g" preferred for beginners; I, l and 1
   distinguishable; no thin weights.
 - **Never set learning words in capitals** (`text-transform: uppercase` removes the word shapes
-  beginners rely on): Critical on reading content.
+  beginners rely on): `other`, Critical on reading content.
 
 ## Overrides: colour
 
-- **Aim for 7:1 contrast on text children read** (WCAG AAA); 4.5 to 7:1 is a Warning here.
+- **Aim for 7:1 contrast on text children read** (WCAG AAA); 4.5 to 7:1 is `other`, Warning here.
 - **Feedback never relies on colour alone**: correct and incorrect pair colour with an icon, motion
   and, optionally, sound.
 
-## Conduct rules (Blockers)
+## Conduct rules (each is a Blocker on this profile: `dark-pattern` or `other`)
 
 - **No autoplaying audio**; sound follows a tap, and mute is reachable from every screen.
 - **No pressure or shame**: no streak threats, no comparisons with friends, no countdowns, no "are you
@@ -61,7 +65,6 @@ For a `0 0 100 100` viewBox: content between y 8 and 92 and x 4 and 96, centred 
 74 to 82; appendages (ears, tails) overlap the body by at least 2px and are drawn before the head so
 the head covers their bases; no sharp triangles or fangs; decorations clipped to the silhouette.
 
-## Expo or React Native
+## Phone and tablet apps
 
-Check that press feedback and shadows have native equivalents; wrap screens with bottom controls in a
-safe-area view; size pressables properly rather than relying on `hitSlop`.
+Use `profile-mobile-app.md` and `mobile.md` together with this profile.

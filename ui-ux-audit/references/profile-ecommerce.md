@@ -1,13 +1,17 @@
 # Profile: E-commerce Storefronts and Checkout
 
+Severities are set only in `severity-registry.md`; the codes in brackets below are its rows.
+
 Product listings, product pages, basket and checkout. These rules override the universal defaults.
 
 Detection: product grids or cards, prices, add-to-basket buttons, variant pickers, quantity steppers,
 basket or checkout routes, or the user saying so.
 
+Main task: find the right product, add it, and reach checkout with the total understood.
+
 Source of truth: the theme tokens, the product-card and price components, and the basket and checkout
 state logic when available. Storefronts usually sell across regions, so locale checks for currency,
-tax and address formats apply at Warning minimum.
+tax and address formats apply.
 
 Simulation persona: a shopper on a phone, one-handed, comparing two products and checking the total
 before paying.
@@ -15,20 +19,20 @@ before paying.
 ## Overrides: price and availability clarity
 
 - **The price paid is visible before adding to basket**, in the buyer's currency, with tax treatment
-  where the locale expects it (EU prices include VAT). Ambiguous or hidden price: Critical.
+  where the locale expects it (EU prices include VAT). Ambiguous or hidden price: `price-unclear`.
 - **No surprise costs at the last step**: shipping, tax and surcharges disclosed before payment
-  (Blocker if revealed only at the end).
+  (`dark-pattern` if revealed only at the end).
 - **Stock state is honest**: an out-of-stock option never keeps an active add-to-basket that succeeds
-  (Critical).
-- **Scarcity and urgency are real** (Blocker if fabricated).
+  (`other`, Critical: the page says one thing and does another).
+- **Scarcity and urgency are real** (`dark-pattern`; Verify when the code does not show them to be invented).
 - **Sale prices are honest**: the struck-through price is a real prior price; the percentage matches
-  the arithmetic (Critical if not).
+  the arithmetic (`discount-wrong`).
 
 ## Overrides: grid and card consistency
 
 - **Every card in a grid shares one anatomy**: image ratio, title line count, price position, badge
-  slot, rating slot, button line (`alignment-consistency.md`). Drift is a Warning; Critical when it
-  breaks the grid at a common width.
+  slot, rating slot, button line (`alignment-consistency.md`). Drift is `card-rows`, Critical when
+  the part out of line is the price or the add button.
 - **Bounded content**: titles clamp to a fixed line count; missing ratings or badges keep their
   reserved space.
 - **Badges** use one vocabulary in one corner and never cover the product's focal point.
@@ -36,22 +40,23 @@ before paying.
 
 ## Overrides: media and variants
 
-- **Product images have fixed dimensions or aspect ratios** (layout shift on a grid is Critical).
+- **Product images have fixed dimensions or aspect ratios** (`media-unsized`).
 - **The gallery**: clear selected thumbnail, keyboard navigation, a zoom with an escape, a no-image
   fallback.
 - **Selected variant is shown by more than colour** (border plus check, `aria-pressed` or radio
-  semantics): colour-only selection is Critical.
+  semantics): colour-only selection is `colour-only`.
 - **Unavailable variants are visibly disabled with the reason in text**; selecting a variant updates
   price, image and stock together.
 - **Quantity steppers** enforce limits and accept typed values.
 - **Swatches, size buttons and quantity steppers are primary controls on phones**: 44px targets.
-  Smaller (24 to 43px) is a Warning; below 24px without spacing, Critical.
+  Smaller is `target-touch`; below 24px without spacing, `target-small` at Critical.
 
 ## Overrides: basket and checkout (the strictest bar)
 
-- **A confusing or broken checkout step is a Blocker.**
+- **A checkout step that cannot be completed is a Blocker** by the registry's first test. Nothing else about
+  checkout changes a severity.
 - **Progress and a way back** on every step, without losing entered data or basket contents.
-- **Guest checkout** exists unless the brief justifies an account (Critical if missing).
+- **Guest checkout** exists unless the brief justifies an account (`other`, Critical if missing).
 - **Inline field errors in text**, focus to the first error, input preserved.
 - **Every state built**: empty basket with a route back, item removed with undo, payment declined,
   address invalid, shipping unavailable, coupon invalid, and a pay button that cannot be pressed twice
@@ -60,13 +65,13 @@ before paying.
 
 ## Overrides: phone first
 
-- A layout that works only at desktop is a Critical responsive failure.
+- A layout that works only at desktop shows up as `page-overflow`, `content-cut-off` or `nav-hidden`.
 - On product pages, add to basket stays within reach on phones (sticky bar or near the top); stranded
-  far below the fold is a Warning.
+  far below the first screen is `other`, Warning.
 - Filters and sort open in an accessible sheet with a visible applied count and "clear all".
 
 ## Content
 
 Real product photography or honestly labelled placeholders; ratings, review counts and "bestseller"
 labels from real data; buttons that name the outcome ("Add to basket", "Pay €89.00"); one term for the
-basket throughout.
+basket throughout (`term-drift`).

@@ -1,65 +1,69 @@
 # ui-ux-audit
 
-A Claude skill that audits web UI for the failures AI consistently ships, measures the render instead of guessing, and raises landing pages, dashboards and analytics pages from competent to exceptional.
+A Claude skill that audits and builds interfaces: web pages, dashboards, analytics reports, shops and mobile apps. It measures the rendered page instead of guessing, scores findings from one fixed table, and raises landing pages, dashboards and reports from competent to distinctive.
 
-Almost every AI UI failure traces back to one root cause: the model generates a plausible static snapshot of a single state (the happy path, on desktop), it cannot see the rendered result, and it carries no persistent design system across generations. The output looks right in a screenshot and breaks the moment content grows, the viewport shrinks, an error occurs, or a second component is generated with slightly different padding. This skill forces all of that into view.
+Almost every AI interface failure has one root cause: the model generates a plausible static snapshot of a single state (the happy path, on desktop), cannot see the rendered result, and carries no design system from one generation to the next. The output looks right in a screenshot and breaks when content grows, the viewport shrinks, an error occurs, or a second component arrives with slightly different padding. This skill forces all of that into view.
 
 ## What it does
 
-Three modes, chosen automatically from how you ask:
+Three modes, chosen from how you ask:
 
-1. **Full audit.** "Run a full UI audit" or "is this ready to ship". Claude renders the page with the bundled measuring script (`scripts/uicheck.py`, Python Playwright) at 360, 768 and 1280px, walks the flow as the real user, a constrained user and an edge-case-data user, then sweeps 16 categories. The report gives a 0-100 score with the arithmetic shown, a ship verdict, findings by severity (Blocker 12, Critical 8, Warning 4, Polish 1, with Polish capped at 5 points), a visual-quality rating with concrete improvements, and the tools that stop each failure family returning.
+1. **Full audit.** "Run a full UI audit" or "is this ready to ship". Claude runs the measuring script (360, 768 and 1280px, or an iPhone or Android device), walks the main task, then goes down the severity registry: one test, one severity and one tie-break per code. The report has a 0 to 100 score, a verdict, findings by severity, a visual quality rating, and the fixes that stop each failure returning. A second script checks the report's format and arithmetic before it is sent.
 2. **Quick review.** "Why does this card look off". Two to five findings, no score.
-3. **Build.** When Claude creates or restyles a page, dashboard or report, it chooses a distinctive art direction, writes one global design system first (type scale, spacing, gutters, radii, control heights, media ratios), computes and double-checks every figure, then measures and fixes until the checks are clean.
+3. **Build.** When Claude creates or restyles a page, dashboard, report or app screen, it sets an art direction, writes one token block first (type scale, spacing, radii, control heights, colours with computed contrast), plans the task and the state views, computes every figure, then measures and fixes until the script lists nothing.
 
-The 16 categories: typography, layout and spacing, visual hierarchy, colour and contrast, component states, forms, touch, responsive behaviour, accessibility (WCAG 2.2), alignment and consistency, navigation and icons, motion, performance, visual quality, content and honesty, and charts, tables and dashboards.
+### Scripts
 
-### Alignment and consistency
+| Script | What it does |
+|---|---|
+| `scripts/uicheck.py` | Renders a page or a flow of screens and lists candidates under registry codes: overflow, contrast, target sizes, unnamed controls, focus, clipped text, widows, card rows and tile values off a shared line, control heights, switch options of different widths, nested radii, near-miss edges, heading proximity, table alignment, safe areas and more. It also clicks every control, walks the tab order, and checks dark, print, loading, empty and error views. Fit is measured three times: in the main pass, in a font pass when a font the page asks for is not installed, and in a pass with 15px scrollbars. It reports a control wider than its box (`control-overflow`), scrolling nobody asked for (`scroll-unexpected`), a scroll area inside another (`scroll-nested`) and a sticky table header that scrolls away. It writes close-ups of controls and box edges at twice the size and a screenshot of every scroll area scrolled to its end, and with `--baseline` it compares a page with its state before a change. It lists candidates; Claude confirms each one. |
+| `scripts/reportcheck.py` | Checks a full-audit report before it is sent: format, codes, allowed severities, length and the score arithmetic. |
+| `scripts/shotcheck.py` | Measures screenshots when there is no code: contrast, sizes and safe areas, marked as estimates. |
 
-The skill holds every element to one global system and measures the faults people notice at once but AI tools miss: headings a few pixels off the grid, a lone card on the last row, prices or KPI values off a shared line, a 40px input beside a 48px button, inner corners that do not follow the outer card, mixed media ratios, drifting gutters, chip and icon sizes, and single words alone on a heading line.
-
-### Measuring script
-
-`scripts/uicheck.py page.html --json checks.json --shots shots/` reports overflow, contrast, target sizes, unnamed controls, invisible focus, unsized media, heading order, small text, widows, lone grid items, card rows and tile values off a shared line, control heights, nested radii, near-miss edges, padding asymmetry, media ratios, icon and chip sizes, gutters, table alignment, missing sticky headers, heading proximity, and a census of radii, shadows, font sizes and section paddings. It measures; Claude judges.
-
-Requirements: Python 3 with Playwright and Chromium (`pip install playwright`, then `playwright install chromium`). It accepts a local HTML file or an http(s) URL; `--dark` checks the dark theme and `--widths` changes the widths.
+Requirements: Python 3 with Playwright and Chromium (`pip install playwright`, then `playwright install chromium`). `shotcheck.py` needs Pillow, and for its text checks the tesseract program with the pytesseract module; without them it runs the remaining checks and says so.
 
 ### Finding format
 
 ```
-**C2. Delta direction shown by colour alone** (`#kpi-grid .delta`, 12 tiles)
-**Found:** what is wrong, with the measurement or snippet
-**Why:** who it hurts
+**C2 [contrast-text] Hero subline is too pale to read** (`.hero p`; 360, 768, 1280)
+**Found:** the fact, with the measurement or the code line
+**Why:** who it hurts and how, one line
 **Fix:** the smallest concrete change
-**Prevent:** the tool or rule that stops recurrence
 ```
 
-## Benchmark (v2.0.0)
+## Test results (v3.0.0 against v2.0.0)
 
-Measured on 15 purpose-built test pages (98 planted faults, 3 clean controls), 3 runs per version, graded blind against answer keys:
+Measured on eight purpose-built test interfaces (117 planted defects on six of them, one clean page, one deliberately unconventional page), five fresh-context audits per interface and version, scored against answer keys:
 
-| Measure | No skill | v1.1 | v2.0 |
-|---|---|---|---|
-| Planted faults found | 86% | 97% | 99% |
-| Blocker and Critical faults found | 95% | 100% | 100% |
-| Scored findings (Warning and above) that are real | 74% | 72% | 97% |
-| Decoys wrongly flagged per audit | 0.56 | 0.69 | 0.11 |
-| Serious false alarms on clean pages | 0.56 | 0.22 | 0 |
-| Severity judged right | 80% | 89% | 96% |
-| Score spread across repeat runs (mean) | 12.6 | 7.0 | 4.9 |
-| Subtle alignment faults found | 85% | 89% | 98% |
+| Measure | v2.0 | v3.0 |
+|---|---|---|
+| Planted defects found | 97.8% (572 of 585) | 99.8% (584 of 585) |
+| Blocker and Critical defects found | 98.5% (266 of 270) | 100% (270 of 270) |
+| Findings that are real (arguable ones counted as wrong) | 97% (590 of 609) | 99% (590 of 595) |
+| Score range across five runs, worst interface | 12 points | 3 points |
+| Clean page: runs with a finding above Polish | 1 of 5 | 0 of 5 |
+| Reports that follow the required format | 10 of 28 measured | 40 of 40 |
+| Planted defects listed by the measuring script | 61 of 117 | 83 of 117 |
 
-Build mode (landing page and dashboard briefs, 3 builds each, two blind judges): overall 7.5 against 7.0 without the skill on the landing page, and 7.7 against 6.8 on the dashboard. Cost per audit is about the same as v1.1 and about 20% above no skill. Caveats: test pages, answer keys and graders are AI-built; fonts were stand-ins.
+Build mode: seven briefs and 27 pairs of builds, each pair judged twice with the sides swapped. Blind judges preferred the v3.0 build to the v2.0 build in 44 of 54 judgements (landing pages 18 of 24, dashboards 14 of 18, board report 6 of 6, iPhone app 6 of 6), and to a build made with no skill in 42 of 42.
+
+After the last changes to the text, 32 further audits: every planted defect found except one Polish item missed once, and both clean pages scored 100 in six of six runs.
+
+Two faults reported from a real project (a switch wider than its box once the real font is drawn, and a fixed panel that scrolls for thousands of pixels because of hidden screen-reader text) were rebuilt as test pages. The earlier script passed both; the script now reports both, with no new candidate on the 13 test pages. In 13 further audits the two faults were found in 7 of 7 audits of those pages and the clean pages scored 100 in 5 of 5. The pages and a test runner are in `tests/` (`python3 tests/run_tests.py`, 5 tests).
+
+Limits of this evidence: test interfaces, answer keys, builders and judges are AI models; 27 pairs of builds put the true preference rate between about 58% and 91%; nothing was tested on a real phone or with a screen reader; fonts on the test machine were stand-ins, and the font pass gives an upper bound, not the real font; no page was built from nothing with the text as changed after the project feedback, so the build figures belong to the text before it.
 
 ## Install
 
-### Claude.ai (web, desktop, mobile)
+### Claude (web, desktop, mobile)
 
-1. Download `ui-ux-audit.skill` from this repository (or from Releases).
-2. In Claude, open Settings, find Skills, and upload the file.
-3. If you do not see a Skills section, check availability for your plan at https://support.claude.com
+1. Download `ui-ux-audit.skill` from this repository (it is a ZIP archive of the `ui-ux-audit/` folder).
+2. In Claude, open your skills list (**Customize > Skills**, or **Plugins > Skills**, depending on the app version), add a skill by upload and choose the file.
+3. If an older version is installed, do not add a second copy: open the skill's **...** menu and choose **Upload new version**. It replaces all files of the skill and keeps earlier versions in its version history.
 
-### Claude Code / Claude Desktop
+Skills need code execution to be enabled. Help: https://support.claude.com/en/articles/12512180-use-skills-in-claude
+
+### Claude Code
 
 Copy the `ui-ux-audit/` folder into your skills directory:
 
@@ -67,58 +71,64 @@ Copy the `ui-ux-audit/` folder into your skills directory:
 # personal (available in all projects)
 mkdir -p ~/.claude/skills && cp -r ui-ux-audit ~/.claude/skills/
 
-# or project-scoped (committed with the repo)
+# or project-scoped (committed with the repository)
 mkdir -p .claude/skills && cp -r ui-ux-audit .claude/skills/
 ```
-
-Run `/skills` in Claude Code to confirm it loaded. Docs: https://code.claude.com/docs/en/skills
 
 The skill follows the open SKILL.md Agent Skills standard, so it also works in other coding agents that support the format.
 
 ## Use
 
-- "Run a full UI audit" on pasted code, project files, or screenshots
-- "Review this component" / "fix the spacing" / "is this ready to ship"
-- Or just let it work: it guides Claude automatically during any UI coding
+- "Run a full UI audit" on pasted code, project files or screenshots
+- "Review this component", "fix the spacing", "is this ready to ship"
+- "Build a dashboard for ...", "restyle this in Swiss grid"
 
-Screenshot-only input is supported with reduced confidence (visual checks only, sizes as labeled estimates).
+Screenshot-only input is supported with reduced confidence: sizes are estimates and the verdict is provisional.
 
-## Customize: project profiles
+## Profiles and styles
 
-Profiles override the universal defaults for a kind of product. Five ship in the box: marketing and landing (including pricing), SaaS and operational dashboards, analytics reports, e-commerce, and children's learning apps. When a project has a house template or brand system, the skill audits within it and raises quality through hierarchy, alignment and copy rather than new fonts or colours. To add a profile, copy an existing `references/profile-*.md`, keep its structure (a `Detection:` line, a source-of-truth note, a simulation persona, `## Overrides:` sections) and register it in the Project profiles section of `SKILL.md`.
+Six product profiles change the defaults for a kind of product: marketing and landing (including pricing), SaaS and operational dashboards, analytics reports, e-commerce, mobile apps, and children's learning apps. To add one, copy an existing `references/profile-*.md`, keep its structure and register it in the Profiles section of `SKILL.md`.
+
+Twelve named styles, each a token block with computed contrast: Swiss grid, Editorial, Quiet product, Dense console, Public-service plain, Soft friendly, Neo-brutalist, Dark premium, Warm craft, Luxury minimal, Technical mono, Glass layered. They are used when you name a style, when a page must match a series, and for reports; otherwise build mode sets its own art direction.
 
 ## Structure
 
 ```
 ui-ux-audit/
-├── SKILL.md                              modes, measuring, severity defaults, scoring, reports, build mode
+├── SKILL.md                              modes, measuring, registry pass, scoring, report, build mode
 ├── scripts/
-│   └── uicheck.py                        measuring script (Python Playwright + Chromium)
+│   ├── uicheck.py                        measuring script (Playwright and Chromium)
+│   ├── reportcheck.py                    report format and arithmetic check
+│   └── shotcheck.py                      screenshot measuring script
 └── references/
-    ├── alignment-consistency.md          global system block and alignment checks (category 10)
-    ├── visual-excellence.md              visual-quality rating, AI default looks, moves per page type (14)
-    ├── user-simulation.md                walk the page as the user
-    ├── structure-typography.md           categories 1-3
-    ├── color-states-forms.md             categories 4-6
-    ├── interaction-responsive-a11y.md    categories 7-9
-    ├── navigation-icons.md               category 11
-    ├── motion-performance.md             categories 12-13
-    ├── content-honesty.md                category 15: fake content, dark patterns, copy, localisation
-    ├── data-viz-tables.md                category 16
-    ├── durable-fixes.md                  failure-to-tooling map
-    ├── examples.md                       worked findings and report shapes
-    ├── profile-marketing-landing.md
-    ├── profile-saas-dashboard.md
-    ├── profile-analytics-report.md
-    ├── profile-ecommerce.md
-    └── profile-kids-app.md
+    ├── severity-registry.md              every code: test, severity, tie-break
+    ├── visual-excellence.md              visual quality rating; depth and finish for build mode
+    ├── usability.md                      build rules and audit checks for the main task
+    ├── style-library.md                  twelve styles, selection table, hold rule
+    ├── styles/                           one token block per style (12 files)
+    ├── mobile.md                         iPhone and Android rules, cited and dated
+    ├── libraries.md                      verified libraries; never recall one from memory
+    ├── alignment-consistency.md
+    ├── structure-typography.md
+    ├── color-states-forms.md
+    ├── interaction-responsive-a11y.md
+    ├── navigation-icons.md
+    ├── motion-performance.md
+    ├── content-honesty.md
+    ├── data-viz-tables.md
+    ├── user-simulation.md
+    ├── durable-fixes.md
+    ├── examples.md
+    └── profile-*.md                      six product profiles
 ```
 
 The core file loads on every trigger; reference files load only when needed.
 
+`tests/` is part of this repository, not of the skill: five acceptance tests for the measuring script with their pages. Run them with `python3 tests/run_tests.py`.
+
 ## Credits
 
-Built from research across the Claude skills ecosystem. Patterns informed by Anthropic's skill-creator and frontend-design skills, Leonxlnx/taste-skill, and community design-audit skills. Standards referenced: WCAG 2.2, EN 301 549, Apple HIG, Core Web Vitals.
+Patterns informed by Anthropic's skill-creator and frontend-design skills, Leonxlnx/taste-skill, and community design-audit skills. Standards referenced: WCAG 2.2, EN 301 549, Apple Human Interface Guidelines, Android and Material guidance, Core Web Vitals.
 
 ## License
 

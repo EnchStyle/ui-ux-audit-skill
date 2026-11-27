@@ -7,7 +7,7 @@ give each as the one-line instruction to paste into a coding assistant, not raw 
 
 | Failure family (categories) | Tool | Instruction to give the assistant |
 |---|---|---|
-| Alignment and consistency drift: card rows, baselines, orphans, widows, control heights, radii, gutters (10) | This skill's `scripts/uicheck.py` in a pre-commit or CI step | "Run uicheck.py on every page before commit and fail when card_rows, baselines, control_heights, grid_orphans, nested_radius or heading widows are not empty." |
+| Alignment and consistency drift: card rows, baselines, orphans, widows, control heights, radii, gutters (10) | This skill's `scripts/uicheck.py` in a pre-commit or CI step | "Run uicheck.py with --fail-on card-rows,tile-baseline,control-heights,grid-lone-item,radius-nested,widow,page-overflow,contrast-text on every page before commit; it exits with status 1 when any of them has items." |
 | Layout breaks at 360px, visual regressions (2, 8, 10) | Playwright screenshot tests | "Add Playwright visual tests that screenshot each page at 360, 768 and 1280px with long-content fixtures and fail on unexpected changes." |
 | Runtime accessibility: names, contrast, landmarks (4, 9) | axe-core via Playwright | "Add an accessibility test that runs axe-core on every page and fails on violations." |
 | Removed focus rings (9) | A grep or stylelint rule | "Fail the build when CSS sets outline: none or outline: 0 without a :focus-visible replacement." (axe-core does not detect this.) |
