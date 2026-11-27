@@ -1,339 +1,303 @@
 ---
-name: ui-ux-audit
-description: "Audits web UI and raises it from competent to exceptional. Catches what AI tools ship and people notice at once: broken or shifting layouts, cards and values off a shared line, orphaned words and lone grid items, drifting radii, gutters, ratios and component sizes, text overflow, missing states, poor contrast, small targets, accessibility gaps, dishonest charts and numbers, and generic AI-looking visuals. Use whenever the user asks to audit, review, check, critique, fix, polish or improve a page, screen, dashboard, report, component, screenshot or design, or says things like 'looks off', 'looks AI-generated', 'is this ready to ship', 'spacing is weird', 'cards don't line up', 'make it look high-end'. Also use when building or restyling a whole page, dashboard, analytics report or component (HTML, CSS, React, Tailwind, SVG charts) so these failures never ship; skip it for one-line edits. Includes a measuring script and profiles for landing pages, dashboards, analytics reports, e-commerce and children's apps."
+name: "ui-ux-audit"
+description: "Audits and builds interfaces: web pages, dashboards, analytics reports, shops and mobile apps (iPhone, Android, React Native, Flutter, installable web apps). Catches what AI tools ship and people notice at once: broken or shifting layouts, cards and values off a shared line, orphaned words, drifting radii and spacing, clipped text, missing states, poor contrast, small targets, controls hidden on phones or under the notch, dishonest charts and numbers, confusing navigation, and generic AI-looking visuals. Use whenever the user asks to audit, review, check, critique, fix, polish or improve a page, screen, flow, dashboard, report, component, screenshot or design, or says 'looks off', 'looks AI-generated', 'is this ready to ship', 'make it look high-end'. Also use when building or restyling a page, dashboard, report, app screen or component, to pick one visual style and hold it; skip it for one-line edits. Includes measuring scripts, a severity registry, a style library and product profiles."
 ---
 
 # UI/UX Audit
 
-Find the interface problems AI tools ship, report them with fixes (audit), or avoid them while building
-(build mode), and push the visual quality from correct to exceptional.
+Find the interface problems AI tools ship and report them with fixes (audit), or avoid them while building
+(build), on the web and on phones.
 
-Most AI UI failures share one cause: the model writes a plausible snapshot of one state at one width,
-never sees the rendered result, and carries no design system from one component to the next. So the
-page looks right in a screenshot and breaks when content grows, the viewport narrows, an error occurs,
-or a second component arrives with slightly different padding. The cure is to measure the render
-instead of reasoning about it, and to hold every element to one global system.
+Most AI interface failures share one cause: the model writes a plausible picture of one state at one width,
+never sees the render, and carries no design system from one component to the next. The cure is to measure the
+render instead of reasoning about it, to hold every element to one system, and to score with one fixed table so
+that two audits of the same page agree.
 
 ## Modes
 
-| Mode | Triggered by | Read | Output |
+| Mode | When | Read | Run |
 |---|---|---|---|
-| **Full audit** | "audit this page", "is this ready to ship", "full review" | This file, the matching profile, `references/visual-excellence.md`, `references/alignment-consistency.md`, `references/user-simulation.md`, then the category references for what the page contains (table below) | Scored report |
-| **Quick review** | "why does this card look off", "check this button" | This file and the one or two references the question touches | Short answer, no score |
-| **Build** | Creating or restyling a page, dashboard, report or component | This file, the matching profile, `references/visual-excellence.md` and `references/alignment-consistency.md`; the pre-flight checklist below stands in for the category references, so open those only when a question comes up | The code, then a short hand-over |
+| **Full audit** | "audit this", "is this ready to ship", "full review" | This file, `references/severity-registry.md`, the matching profile, `references/user-simulation.md`. Open a category reference only for a registry row you marked present or could not decide | `uicheck.py` (or `shotcheck.py` for images), then `reportcheck.py` on the report |
+| **Quick review** | A question about one element or one symptom | This file and the registry rows the question touches; at most two category references | `uicheck.py` when there is a page to render |
+| **Build** | Creating, restyling or changing a page, screen, flow or component. A repair to an existing page counts, however small it looks: measure before and after (step 7) | This file, the matching profile, `references/style-library.md`, `references/visual-excellence.md`, `references/usability.md`; `references/libraries.md` before using any library; `references/mobile.md` for phone screens | `uicheck.py` until clean |
 
-A matching profile overrides the universal defaults wherever they differ.
+Read what the mode lists and no more: a skipped file loses its rule, and loading everything buries the rules
+that matter. A matching profile overrides the general rules wherever it says so.
 
 ## Step 1: measure the render
 
-Run the bundled script on the page before judging anything:
-
 ```
-python3 <skill folder>/scripts/uicheck.py page.html --json checks.json --shots shots/
+python3 <skill>/scripts/uicheck.py page.html --out out/                              # web page
+python3 <skill>/scripts/uicheck.py s1.html s2.html s3.html --device iphone --out out/ # phone screens (or android)
+python3 <skill>/scripts/shotcheck.py shots/*.png --platform ios --out out/            # screenshots only
 ```
 
-It needs Python Playwright with Chromium (it also accepts an http(s) URL; add `--dark` for the dark
-theme, `--widths 320,360,768,1280,1440` to change widths). It renders at 360, 768 and 1280px and
-measures horizontal overflow, contrast, target sizes, unnamed controls, invisible focus, unsized
-media, heading order, small text, widows and wrapping button labels, lone grid items, card rows off a
-shared line, tile values off a baseline, side-by-side control heights, non-concentric corners,
-near-miss left edges, padding asymmetry, mixed media ratios, icon and chip size drift, gutters,
-table header alignment, long tables without a sticky header, heading proximity, and a census of
-radii, shadows, font sizes, families and section paddings.
+`uicheck.py` renders at 360, 768 and 1280px (or the phone), in the dark scheme too when the page has dark
+styles, and writes `out/checks.json`, first-screen and full-page screenshots, one sheet of close-ups per width
+in `out/crops/` (control groups, form rows and panel edges at twice the size) and, for each scroll area, a
+screenshot scrolled to its end. It prints candidates under the same codes the registry uses, then a focus test,
+a tab walk, a click census (every distinct control operated once), the figures to cross-check, a census of
+tokens and decoration, the fonts that were not available, the environment, and a **run id**. It also draws the
+page with stand-ins for missing fonts and with real scrollbars; what only those passes list is marked
+`_font-check` and `_scrollbars`. Other inputs: an address works like a file; `--attr data-theme=dark` for themes
+switched by an attribute; `--states loading,empty,error`; `--print`; for a page that needs a build step, bundle
+it first and say what stood in for what.
 
-- The script measures; you judge. Every item it reports is a candidate, not a finding: confirm it on
-  the screenshots, decide whether it matters, and group items with one cause into one finding.
-- Text over gradients or images is counted, not measured: sample the pixels behind it.
-- Look at every screenshot yourself at all three widths. The script cannot see hierarchy, rhythm,
-  crowding, visual weight, the idea behind the design or whether it looks exceptional.
-- If the page needs a build step (TSX, Tailwind without a build), bundle it quickly (esbuild) or map
-  the classes to CSS by hand, and say what stood in for what. If fonts are missing, name the stand-ins:
-  line breaks, widows and wraps depend on the font, so report those as font-dependent.
-- No Playwright available: read the code, reason carefully, and label measurements as estimates.
-- Screenshot only: judge what a picture can show (hierarchy, contrast, spacing, alignment, copy,
-  visual quality); state sizes as estimates against a named reference; never invent line numbers or
-  class names; put code-dependent items under Verify; mark the score "provisional".
+- **Candidates are not findings.** Confirm each on a screenshot or in the code. What you cannot confirm is
+  dropped or goes under Verify. Open `checks.json` when the output says more items are there.
+- **Look at every screenshot, close-up sheet and scrolled-to-the-end screenshot.** The script cannot see
+  hierarchy, crowding, or whether the design has an idea. A button cut off at a panel edge is a few pixels on a
+  full-page image, and a full-page image of an app shell is one screen: the close-ups and the end-of-scroll
+  images are where those show.
+- **A stand-in font is not a pass for fit.** With a missing font the main passes show what a visitor without it
+  sees, not what the house font does to the layout. Fit counts as measured only where the output says a font of
+  the same widths drew the text. What the font pass lists with a wide stand-in is a risk: Verify, with its code.
+  With no stand-in at all, fit goes under Verify, never under Clean.
+- **The script does not judge meaning.** Read and look for: chart honesty (axis start, how series are told
+  apart), figures that should agree (use the figures list), claims and copy, meaning carried by colour alone,
+  charts drawn on canvas, and every usability row.
+- **A fix is finished only when a new run no longer lists it.** Quote the new run id.
+- **No browser available:** read the code, write "no browser: estimates only" in Checked, and call the score
+  provisional.
+- **Screenshots only** (a design, a native app): run `shotcheck.py`; it says which numbers are measured and
+  which are estimates. Judge only what an image shows; put the rest under Verify; call the score provisional.
+- **Native app source** (Swift, Kotlin, React Native, Flutter): follow `references/mobile.md`.
 
-## Step 2: walk it as the user (full audits)
+Never report a measurement you did not take, a selector you did not see, or a screenshot you did not open.
+The scripts are in `scripts/` beside this file. Never say that one is missing or could not run without quoting
+the command you tried and the error it gave.
 
-Before the category sweep, walk the main flow as the real user, a constrained user (keyboard only, or
-200% zoom, or colour-blind) and an edge-case-data user (empty, long, many). Only the walk catches
-contradictory states, controls that relabel without acting, and happy-path-only flows. Details in
-`references/user-simulation.md`. Skip it for a single static element.
+## Step 2: walk the main task (full audits)
 
-## Step 3: sweep the categories
+Name the page's main task (the profile says what it is) and walk it as `references/user-simulation.md`
+describes: as the real user, as a constrained user, and with awkward data. Use the click census and tab walk
+as evidence of what each control does. Record whether the task can be completed, in how many steps, and each
+hesitation.
 
-| # | Category | Reference |
-|---|---|---|
-| 1 | Typography and text breaking | `structure-typography.md` |
-| 2 | Layout and spacing | `structure-typography.md` |
-| 3 | Visual hierarchy | `structure-typography.md` |
-| 4 | Colour, contrast, dark mode | `color-states-forms.md` |
-| 5 | Component states | `color-states-forms.md` |
-| 6 | Forms | `color-states-forms.md` |
-| 7 | Touch and interaction | `interaction-responsive-a11y.md` |
-| 8 | Responsive behaviour | `interaction-responsive-a11y.md` |
-| 9 | Accessibility | `interaction-responsive-a11y.md` |
-| 10 | Alignment, consistency and tokens | `alignment-consistency.md` |
-| 11 | Navigation and icons | `navigation-icons.md` |
-| 12 | Motion | `motion-performance.md` |
-| 13 | Performance and layout shift | `motion-performance.md` |
-| 14 | Visual quality and distinctiveness | `visual-excellence.md` |
-| 15 | Content, copy and honesty | `content-honesty.md` |
-| 16 | Charts, tables, dashboards | `data-viz-tables.md` |
+## Step 3: go down the registry
 
-All references live in `references/`. A full audit covers every category the page contains; a quick
-review covers the ones the question touches.
+Take `references/severity-registry.md` from top to bottom once. For every row: present, absent, or Verify.
+One finding per code; severity from the table. Category references explain what to look for and how to fix:
 
-## Severity
-
-Judge by harm to the user, never by how easy the fix is.
-
-| Severity | Points | Meaning |
-|---|---|---|
-| **Blocker** | 12 | Stops a core task, deceives the user, or creates legal or accessibility exposure: content or the primary action unreachable, keyboard trap or focus removed everywhere, data loss, a dark pattern, a chart or number that misleads. |
-| **Critical** | 8 | Major harm on a common path: body or CTA contrast below AA, horizontal scroll at 360px, a missing empty or error state on a primary flow, placeholder as the only label, a control with no accessible name, unsized media shifting the layout, figures that contradict each other, a control that visibly relabels without acting. |
-| **Warning** | 4 | Degrades the experience: off-system spacing, cards or values off a shared line at desktop, mixed ratios or control heights, a lone grid item, duplicate CTA intent, weak hierarchy, a generic or forgettable landing page. |
-| **Polish** | 1 | Refinement: widows, nested corners, near-miss edges of a few pixels, padding asymmetry, straight quotes, tone slips. |
-
-Defaults for frequent findings (depart only with a reason tied to this page):
-
-| Finding | Default |
+| Registry group | Reference |
 |---|---|
-| Focus indicator removed with no replacement, across the page | Blocker |
-| Focus indicator present but below 3:1 against its surroundings | Warning |
-| A control keyboard users cannot reach or operate (a clickable `div`) | Critical, on every profile |
-| Keyboard order illogical but complete (an opened menu placed before its toggle) | Warning |
-| Skipped heading levels | Warning |
-| Icon-only control with no accessible name | Critical |
-| Horizontal scroll at 360px | Critical; Blocker when content or the primary action becomes unreachable |
-| Body or CTA text below 4.5:1 (3:1 for large text), including CTA labels on gradients | Critical |
-| Placeholder as the only label | Critical |
-| Missing empty, error or completion state on a primary flow; an empty result shown as real zeros | Critical |
-| A success message that is untrue ("Copied", "Sent", "Saved" when nothing happened) | Critical (a progress message that ends with nothing is Wiring) |
-| Chart axis or scale that exaggerates; figures that should agree but do not | Blocker on analytics products, Critical elsewhere |
-| Chart missing its title, axis titles, units or text alternative | Warning (one finding per chart) |
-| Chart series told apart only by colour, or series marks below 3:1 | Critical on analytics products, Warning elsewhere |
-| Long table (more than about 15 rows) with no sticky header | Warning |
-| A control whose code updates labels or captions to claim a new state while the data stays the same | Critical. A native select or button with no handler at all is Wiring to confirm |
-| Target below 24 × 24px without 24px spacing (WCAG 2.5.8) | Critical on a primary control, Warning otherwise |
-| Primary touch control 24 to 43px on a touch-first product | Warning |
-| Images or embeds with no `width` and `height` or `aspect-ratio` | Critical, judged from the code. A local render showing no shift does not clear it: inline or cached images decode before paint, real network images do not |
-| Card rows or tile values off a shared line | Warning at desktop widths; Critical when users compare the misaligned price or CTA; Polish when it happens only at phone widths |
-| Plot areas of side-by-side charts at different heights | Polish |
-| Lone item on the last row of a fixed set (features, plans, stats) | Warning at the main desktop and phone layouts; Polish at in-between widths; catalogues exempt |
-| Drift in section padding, gutter, control height, media ratio, or between different radius systems (sharp and round) | Warning (one finding per property) |
-| Small drift within one system: radii 2 to 4px apart, chip heights, icon sizes, button padding | Polish (one finding per property) |
-| Navigation hidden on phones with no menu, when it holds destinations users need (sign in, pricing, a shop's categories) | Critical |
-| Headline that does not say what the product does | Warning; Critical only when nothing on the first screen says what it is |
-| Generic template look or forgettable design on a landing or marketing page (see Visual quality) | Warning; on dashboards, reports, shops and apps the visual verdict is advice, not scored |
-| Contained scroller (nav strip, table) with no visible cue that more is hidden | Polish |
-| Widows, nested corners, near-miss edges, padding asymmetry | Polish (group each kind into one finding) |
-
-When torn between two severities, choose the lower and say why. Inflated audits get ignored.
+| Reach, layout and text | `structure-typography.md`, `interaction-responsive-a11y.md` |
+| Accessibility | `interaction-responsive-a11y.md`, `color-states-forms.md` |
+| States and behaviour | `color-states-forms.md`, `motion-performance.md` |
+| Honesty and data | `content-honesty.md`, `data-viz-tables.md` |
+| Consistency | `alignment-consistency.md` |
+| Usability and navigation | `usability.md`, `navigation-icons.md` |
+| Mobile | `mobile.md` |
+| Visual quality | `visual-excellence.md`, `style-library.md` |
 
 ## Scoring
 
-**Score = 100 minus points, floored at 0.** Polish findings together deduct at most 5 points. Only
-findings confirmed on the page as it is count; Verify and Wiring items are listed but not scored.
-Count per severity and compute in code, then show the arithmetic:
-`100 − (1×12) − (2×8) − (4×4) − min(5, 3×1) = 53/100`.
+**Score = 100 − 12 per Blocker − 8 per Critical − 4 per Warning − at most 5 for all Polish, floored at 0.**
+Do not add it up by hand: `scripts/reportcheck.py` prints the score line and verdict computed from your findings.
+Verdicts: 90 to 100 Ready to ship; 70 to 89 Ship after fixing the top findings; 40 to 69 Significant rework;
+below 40 Do not ship. Any Blocker means Do not ship. Screens that form one task are one flow with one score;
+unrelated pages are scored separately and never averaged.
 
-Verdicts: 90 to 100 Ready to ship; 70 to 89 Ship after fixing the top findings; 40 to 69 Significant
-rework; below 40 Do not ship. Any Blocker means "Do not ship" whatever the score.
+## Visual quality rating
 
-## What not to flag
+Every full audit gives one rating, decided by what can be counted (the tells are listed in
+`references/visual-excellence.md`; the script's decoration census counts several of them):
 
-These are the usual sources of noise. Leave them out of the scored findings:
+1. **Inconsistent**: two or more of `radius-drift`, `section-rhythm`, `gutter-drift`, `type-scale-drift`,
+   `shadow-drift`, `style-drift` are present.
+2. **Generic template**: three or more template tells.
+3. **Competent but forgettable**: fewer than three tells, but the design has no idea of its own: it is the
+   platform or framework default look. Test: name one designed element made for this product (a layout device,
+   a type treatment, an illustration or chart style, a signature component). A logo, a single icon, the subject
+   matter and platform-standard components do not count. If none can be named, it is this rating.
+4. **Distinctive with slips**: one can be named (name it), with consistency or visual findings at Warning or
+   above.
+5. **Exceptional**: one can be named, with nothing above Polish in those groups.
 
-- **Wiring a static page cannot have.** Links to `#`, buttons without handlers, pagination, export,
-  search over data the page does not hold, forms with no endpoint. List them once, unscored, under
-  **Wiring to confirm**. The exception: the page shows a result that is false (a filter that relabels
-  the view but not the data, a success message after a failed copy, a count that contradicts the
-  table). That is a finding.
-- **Latent problems the page's own data cannot trigger** (a fixed axis that would clip a spike that
-  never occurs). Put them under Verify if the data will be live; otherwise drop them. Unsized media
-  is not latent: it is a confirmed finding from the code.
-- **House floors that are not standards.** WCAG sets no minimum font size. 12px chart ticks, table
-  headers and labels are normal in dense data UI; 13 to 15px secondary copy is fine. Flag type size
-  only below 12px, or body reading copy below 16px on a reading page (Polish; Warning below 14px).
-- **Targets that pass WCAG 2.5.8** through the spacing or inline exception: text links in sentences
-  and link lists (footers, breadcrumbs), dense 32px controls with room around them on pointer-first
-  dashboards.
-- **Control boundaries a text label already identifies.** WCAG 1.4.11 asks for 3:1 on the parts
-  needed to identify a control: text-field edges, checkboxes, toggles, icon-only buttons. A labelled
-  select or text button does not need a 3:1 border.
-- **Missing dark mode** unless the product has or promises one; **token hygiene** (raw hex, magic
-  numbers) unless it causes visible drift; **meta tags, favicons, company disclosures and legal
-  advice**, which belong to other reviews.
-- **Deliberate, consistent choices**: a labelled zoomed axis, a contained horizontal table scroller
-  with a visible cue, dense controls on a pointer-first tool, a chosen aesthetic executed well,
-  documented exceptions, established domain conventions (bracketed accounting negatives, locale
-  number formats, contract-month labels). If you disagree with a deliberate choice, ask under
-  Questions; do not score it.
-- **The same root cause twice.** One finding lists every occurrence.
-- **Pure taste.** Every finding names who it hurts and how.
+Take the first that applies. Only rating 2 on a landing page is scored (the single Warning `visual-generic`,
+because tells can be counted); every other rating, on every profile, is advice. When there is a house template or brand system, its fonts
+and colours are fixed: judge execution inside it and never propose new ones.
 
-## Alignment and consistency: the global system
+## Report (full audit)
 
-People notice at once what AI tools miss: a heading 4px off the grid below it, one card alone on the
-last row, prices at three heights across a row, a 40px input beside a 48px button, an inner corner
-that does not follow the outer one, a single word alone on a heading's last line. Treat the page as
-one system with global settings for type scale, spacing, gutters, radii, control and chip heights,
-icon sizes and media ratios, and audit every element against it. `references/alignment-consistency.md`
-lists each check with its measurement, fix and severity. In build mode, write that system first (the
-global block described there) and derive every component from it.
-
-## Visual quality: raise it
-
-Correct is not the bar; distinctive and clear is. In every full audit, rate the visual quality
-(Exceptional, Distinctive with slips, Competent but forgettable, Generic template, Inconsistent) and
-give two to four concrete moves grounded in this product, not a style lecture.
-
-- **Landing and marketing pages**: the page is the brand's flagship, so "Competent but forgettable"
-  and "Generic template" are scored Warning findings, with the moves written into the finding's Fix.
-- **Dashboards, analytics reports, shops and apps**: clarity comes first, so the rating and moves go
-  in the Visual quality section, unscored, whatever the rating. Hierarchy faults that are verifiable
-  (no dominant metric, twelve equal tiles, chrome louder than the data) are ordinary findings.
-- Measurable faults (section rhythm, radii, grey families, alignment) are always their own findings,
-  never folded into the visual verdict.
-
-When the project has a brand system or house template, its fonts and colours are fixed: raise
-quality through hierarchy, rhythm, alignment, data-ink and copy inside it. Details and a library of
-moves per page type are in `references/visual-excellence.md`.
-
-## Finding format
-
-Each finding has an ID (B1, C1, W1, P1 in report order) and a short title:
+Write exactly this shape, then pass the draft to the checker on standard input and fix what it lists until it
+prints OK: `python3 <skill>/scripts/reportcheck.py - --checks out/checks.json <<'DRAFT'` … `DRAFT`. No report
+file is needed; the report is your reply.
 
 ```
-**C2. Delta direction shown by colour alone** (`#kpi-grid .delta`, 12 tiles)
-**Found:** <what is wrong, with the measurement or snippet>
-**Why:** <who it hurts, one line>
+# UI audit: <page or flow>
+**Score:** 100 − (B×12) − (C×8) − (W×4) − min(5, P) = NN/100
+**Verdict:** <band>
+**Profile:** <name>. **Style:** <the house template or brand system the user named, or "none given">
+**Checked:** uicheck run <id> (<browser, fonts drawn, scrollbars: the words the script prints>) at <widths or device>, <light and dark>; <n> screenshots viewed; walk of <n> controls; <limits, and the user's own environment where it was not reproduced>
+**Visual quality:** <rating>: <one line why>
+**Top 3:** <ID and title; ID and title; ID and title>
+
+## Blockers (N)
+## Critical (N)
+## Warnings (N)
+## Polish (N)
+## Task walk
+<task | completed or not | steps | hesitations, citing finding IDs>
+## Visual quality
+<the rating, the element that makes the page specific or the tells counted, and two to four concrete moves>
+## Verify (N)
+<what the input could not confirm, each with the code and severity it would take>
+## Wiring to confirm
+<one line listing inert controls a static page cannot have>
+## Clean
+<one line: registry groups checked with nothing found>
+## Durable fixes
+<one to three tools from durable-fixes.md, each as a sentence to paste into a coding assistant>
+## Questions
+<at most three, each with the assumption made>
+```
+
+Findings under Blockers, Critical and Warnings:
+
+```
+**C2 [contrast-text] Hero subline is too pale to read** (`.hero p`; 360, 768, 1280)
+**Found:** <the fact, with the measurement or the code line>
+**Why:** <who it hurts and how, one line>
 **Fix:** <the smallest concrete change>
-**Prevent:** <tool or rule that stops the family; first finding of a family only>
 ```
 
-Keep Found and Why to one or two lines. Polish items take one line each.
-
-## Full audit report
-
-```
-# UI audit: <page>
-**Score:** <arithmetic> = NN/100. **Verdict:** <band, or Do not ship if any Blocker>
-**Profile:** <name or none>. **Checked:** <uicheck at 360/768/1280, screenshots, keyboard walk; stand-ins>
-**Visual quality:** <rating>, <one line on why>
-**Top 3:** <IDs, one line each>
-
-## Blockers (N) / ## Critical (N) / ## Warnings (N) / ## Polish (N)
-## Visual quality: <the rating and two to four concrete moves tied to this page (on landing pages the moves also sit in the finding's Fix)>
-## User walk: <two to four lines the walk found that the checklist did not, citing IDs>
-## Verify (N): <what the input could not confirm, each with the severity it becomes if confirmed>
-## Wiring to confirm: <one line listing inert controls a static page cannot have>
-## Clean: <one line naming categories checked with nothing found>
-## Durable fixes: <one to three tools matched to the stack>
-## Questions: <at most three, each with the assumption made>
-```
-
-Omit empty sections. About 1,200 words for one page. No preamble. For several pages, score each
-separately and add a short cross-page summary; never average unrelated pages.
+Polish findings take one line: `**P1 [widow]** <where>. Fix: <change>.` IDs run B1, C1, W1, P1 in order. The
+code in brackets is the registry code. Omit a section only when it is empty (Task walk always stays). About
+1 200 words for a page and 1 500 for a flow with up to ten findings, plus 40 words for each finding beyond ten:
+an audit nobody finishes reading fixes nothing. If it does not fit, shorten Why and Fix; never drop a finding
+to save words. No text before the first line.
 
 ## Quick review
 
-Open with one line: how many issues and the worst. Then two to five findings in severity order in the
-finding format (Prevent only if one tool stops the whole family). Close with at most two lines on what
-depends on code you did not see. About 400 words, no score unless asked, fixes inline.
+One line first: how many issues and the worst. Then two to five findings in the finding format, most severe
+first. Cover the whole element asked about (its layout, its figures against the script's cross-check list,
+its states), not only the symptom named. End with at most two lines on what depends on code you did not see. About 400 words, no score.
 
 ## Build mode
 
-1. **Art direction first.** Before any code, sketch three directions in your working notes, each
-   with: the idea in one sentence (what makes the page specific to this product, data and
-   audience), a type pairing and scale, a palette drawn from the subject's own world (freight:
-   kraft, container rust and ink; energy: slate and signal amber) rather than default SaaS blues,
-   teals and greens, one signature element, and a layout motif. Pick the most specific direction
-   that stays clear; the safe option is usually the generic one, so never pick it by default.
-   Test the choice against the default looks in `references/visual-excellence.md`, including the
-   generic SaaS look (system sans, white rounded cards on grey, one saturated button colour,
-   numbered section chips): if a stranger could not tell this page from ten other AI-built pages,
-   choose again. With no web fonts, character comes from system stacks used with intent (a serif
-   display stack such as `"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif` against
-   a sans body, or a condensed stack for data), a large display size with tight tracking, weight,
-   colour and composition (at least one full-bleed band; not every section an equal card grid).
-   The signature element is real content set large: the product's own output or the data's most
-   telling view. A house template or brand system, when there is one, replaces these choices.
-2. **Write the global system block** (`references/alignment-consistency.md`): type scale, spacing
-   scale, gutters, radius steps, control and chip heights, icon sizes, media ratios, colour roles for
-   light and dark themes, content widths. Components use only these values.
-3. **Build every state and width**: loading, empty, error, disabled, long content; 360, 768, 1280
-   and 1440px. Include a skip link. Dashboards and reports follow the system colour scheme with a
-   light and a dark theme from the same tokens.
-4. **Answer the brief, and compute every figure.** Map each question in the brief to the section
-   that answers it and check it is answered visibly, also after filtering (a comparison across
-   regions over time needs the regions in the trend charts). Titles, captions and summary
-   sentences update with the filters. Calculate each displayed number in code from the source data,
-   then recompute a sample a second way (for example in Python) and compare, including after each
-   filter change. The method note must describe exactly what the code does (weighted versus simple
-   means, periods, exclusions), and every section must use the same method. Never invent a figure;
-   label chosen thresholds as choices.
-5. **Measure and look.** Run `scripts/uicheck.py`, then look at every screenshot. Fix until overflow,
-   contrast, unnamed controls, invisible focus, unsized media, heading skips, card rows, baselines,
-   control heights, nested radii, grid orphans and heading widows are all zero, and the census shows
-   at most three radius steps (plus pills and circles) and two shadow levels. Re-run after every fix.
-6. **Judge your own page cold.** Look at the 1280 and 360 screenshots as a design director seeing
-   it among ten competitors, and score visual distinctiveness, clarity and craft from 1 to 10. If
-   distinctiveness is below 8, change the direction (type, palette, composition, signature), not
-   just details; then measure again.
-7. **Hand over** in about 200 words: the file, what it does, the measurements that passed,
-   assumptions made, at most three questions. No audit report.
+1. **Profile and brief.** Pick the profile. Write one sentence saying what the screen is for and who uses it;
+   it appears on the first screen in the user's words, as the subline of a landing page and beside the heading
+   elsewhere. On a dashboard or a report the heading is the answer itself ("4 deliveries are running late", "Revenue
+   rose 6% in the quarter"); controls such as filters come after the answer, not before it.
+2. **Art direction first, then one token block.** A house template or brand system, when there is one,
+   replaces these choices. When the user names a style or a mood, wants several pages or products to match, or
+   the page is a report or analysis, take the style from `references/style-library.md` (its table chooses when
+   no name is given) and make it this product's as that file says. Otherwise, before any code, sketch three
+   directions in your working notes, each with: the idea in one sentence (what makes the page specific to
+   this product, data and audience), a type pairing and scale, a palette drawn from the subject's own world
+   (freight: kraft, container rust and ink; energy: slate and signal amber) rather than default SaaS blues,
+   teals and greens, one signature element, and a layout motif. Pick the most specific direction that stays
+   clear; the safe option is usually the generic one, so never pick it by default. Test the choice against
+   the template tells in `references/visual-excellence.md`: if a stranger could not tell this page from ten
+   other AI-built pages, choose again. With no web fonts, character comes from system stacks used with intent
+   (a serif display stack such as `"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif` against a
+   sans body, or a condensed stack for data), a large display size with tight tracking, weight, colour and
+   composition (at least one full-bleed band; not every section an equal card grid). The signature element
+   is real content set large: the product's own output or the data's most telling view.
+   Either way, write the result as one token block in the form the style files use (fonts, seven sizes,
+   colours including `--ok`, `--warn` and `--bad`, radii, shadows; a light and a dark set for dashboards,
+   reports and apps) as the first thing in the style sheet. Components use only its values, and every screen
+   of a flow carries the same block: that is what stops drift between screens.
+   Then list the sections and, beside each, the view it will show (Depth and finish in
+   `references/visual-excellence.md`): a section planned as words alone needs a reason.
+3. **Plan for use** (`references/usability.md`): one main action per screen, a next step always visible,
+   navigation that shows where the user is and how to go back, plain labels, advanced options tucked away.
+4. **Real content, computed figures.** Use the user's content or sample content labelled as sample. Compute
+   every displayed number in code from the source data, recompute a sample a second way, and make every
+   section use the same method; describe the method in a short note. Never invent a figure, a customer, a quote
+   or a logo. Titles and captions follow the filters.
+5. **Libraries** only from `references/libraries.md`, themed to the style tokens, never left on their defaults,
+   never recalled from memory.
+6. **Every state and width.** Loading, empty, error, disabled and long content; 320 to 1440px, or the phone
+   sizes in `references/mobile.md`. A page with states reads `?state=loading|empty|error` from its address
+   and shows that state, so the script and the user can see each one.
+7. **Measure.** `python3 <skill>/scripts/uicheck.py page.html --widths 320,360,768,1280,1440 --states loading,empty,error --out out/`
+   (add `--device` for phone screens; pass every screen of a flow in one call to get the style-drift check).
+   Fix until these are empty: page-overflow, content-cut-off, control-obscured, text-clipped, text-spill,
+   text-overlap, contrast-text, false-feedback, focus-missing, keyboard-unreachable, name-missing, label-placeholder,
+   alt-missing, heading-order, zoom-blocked, hover-only, media-unsized, card-rows, tile-baseline,
+   control-heights, segment-widths, grid-lone-item, radius-nested, heading-proximity, safe-area, style-drift, and widow on
+   headings, control-overflow, scroll-unexpected, scroll-nested and table-sticky, in the `_font-check` and
+   `_scrollbars` passes too: a layout that only fits a narrow stand-in font, or only without scrollbars, does
+   not fit. Run again after every fix. Clear a candidate by repairing the element, never by deleting the
+   detail it sits in.
+   Keep the first clean run (`cp out/checks.json out/baseline.json`) and run every later change set with
+   `--baseline out/baseline.json`, repairs made for accessibility included: a fix for one row can break another
+   (hidden text that stretches a panel, a label that widens a switch). Clear every line it prints under
+   "regression" before handing over. The run also lists fonts that were not available: its screenshots show what visitors
+   without those fonts will see, so if a display face has fallen back to a default-looking one, change the
+   stack until the stand-in still looks intended.
+   **A house or framework style sheet laid over an existing page**: take the baseline first. A shared component
+   class (callout, card, note) restyles everything inside it, so weight, size and padding of any control in
+   it change too: wrap text in text components, and measure again every control that ends up inside one (the
+   regression pass lists controls whose type or padding changed). Search both style sheets for class names
+   they share (`.title`, `.body`, `.note`): the system's type rule will land on the page's layout element.
+8. **Look as a stranger.** From the first-screen screenshots alone answer: what is this, who is it for, what is
+   the main action, where am I, what is the largest thing on the screen? If any answer needs the code, fix the
+   design. Then go through the eight checks and Depth and finish in `references/visual-excellence.md` on the
+   full-page screenshots, section by section.
+   Last, judge the page cold: look at the 1280 and 360 screenshots as a design director seeing it among ten
+   competitors, and score visual distinctiveness, clarity, craft and finish from 1 to 10. If distinctiveness
+   is below 8, change the direction (type, palette, composition, signature), not just details; if finish is
+   below 8, add the views that are missing; then measure again.
+9. **Hand over** in about 200 words: the file, the direction or style and why, the run id with the environment
+   the script prints (browser, fonts drawn, scrollbars), what passed, what was not reproduced of the user's own
+   environment (their browser and system, the house font), assumptions, at most three questions. No audit report.
 
 Pre-flight checklist (the failures that slip through most often):
 
-1. Flex children holding text have `min-width: 0`; grid tracks use `minmax(0, 1fr)`; user content and
-   long tokens use `overflow-wrap: anywhere` (not `break-word`, which does not shrink the min-content
-   width).
-2. Headings and short text use `text-wrap: balance`; paragraphs `text-wrap: pretty` (Chromium and
-   Safari only), plus `&nbsp;` between the last two words of key headlines.
-3. Sibling cards align inner rows with `grid-template-rows: subgrid`; fallback: reserved heights in
-   `lh` units and footers pinned with `margin-top: auto`.
-4. Fixed sets (features, plans, stats) divide evenly into the column count at every breakpoint.
-5. Inner radius = outer radius minus inset; one control height per size; one chip height; one media
-   ratio per set, with `aspect-ratio` and `object-fit: cover`.
-6. Every interactive element has hover, `:focus-visible` and active states; focus is never removed
-   without a replacement.
-7. Loading, empty, error, disabled and completion states exist; an empty result never shows as zeros.
-8. Contrast meets AA: 4.5:1 body text, 3:1 large text and the parts that identify a control.
-9. Labels sit above inputs; errors are text below the field, never colour alone.
+1. Flex children holding text have `min-width: 0`; grid tracks use `minmax(0, 1fr)`; user content uses
+   `overflow-wrap: anywhere`.
+2. Headings use `text-wrap: balance`; key headlines also have `&nbsp;` between the last two words.
+3. Sibling cards align inner rows with `grid-template-rows: subgrid`, or reserved heights and pinned footers.
+4. Fixed sets divide evenly into the column count at every breakpoint, or the last item spans the row.
+5. Inner radius = outer radius − inset; one control height per size; one width for the options of a switch; one media ratio per set.
+6. Every control has hover, `:focus-visible` and active states; nothing essential appears on hover only.
+7. Loading, empty, error and completion states exist; an empty result is never drawn as zeros;
+   `[hidden] { display: none !important }`, so that no display rule shows a message that is marked hidden.
+8. Contrast: 4.5:1 for text, 3:1 for large text and for the edges that identify a control.
+9. Labels sit above fields; errors are text beside the field, never colour alone.
 10. Images and embeds have `width` and `height` or `aspect-ratio`.
-11. Motion uses transform and opacity, 150 to 300ms, and honours `prefers-reduced-motion`.
-12. Numbers use `font-variant-numeric: tabular-nums`, right-aligned in tables with matching headers,
-    one format and precision per metric, and every figure agrees with every other.
-13. Charts have a title that states the point, labelled axes with units, zero-based bars, direct
-    labels where possible, and colour that is never the only signal. The plot area starts after the
-    widest tick label; direct labels that would collide are offset or moved to a legend.
-14. Tables show their rows in the page flow (or paginate); no fixed-height inner scroll box that hides
-    rows on desktop. Navigation keeps every section reachable on phones (a menu if links are hidden).
-15. Copy is specific; buttons are verbs naming the outcome; prices show currency, period and VAT.
+11. Motion uses transform and opacity, 150 to 300ms, and stops under `prefers-reduced-motion`.
+12. Numbers use tabular figures, right-aligned in tables with matching headers, one format per metric.
+13. Charts: a title that states the point, axis titles with units, bars from zero, direct labels, never colour
+    as the only signal.
+14. Phones: a viewport meta tag that allows zoom, a menu for anything hidden, safe-area padding on fixed bars,
+    44px (iPhone) or 48px (Android) controls, fields at 16px or more.
+15. Copy is specific; buttons are verbs naming the outcome; prices show currency, period and tax.
+16. Text for screen readers only: `position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap`, inside a `position: relative` cell, row or
+    label. With no positioned parent nearby it is placed against a distant one and stretches that box.
+17. One scroll area per region, never one inside another that scrolls the same way. In an app shell the page
+    does not scroll and each panel has exactly one inner scroller. To clip a panel sideways use
+    `overflow-x: clip`; `overflow-x: hidden` alone makes it scroll down as well, and `overflow: hidden` hides a
+    stretched scroll area without removing it.
+18. A long table keeps its header in view by sticking to whatever scrolls: no overflow box around a table that
+    scrolls with the page. On phones a wide table becomes stacked rows, or pages of 15 rows or fewer in a
+    sideways scroller with the first column sticky.
+19. A switch or button row in a narrow panel: label above, options of one width, room to spare in the font pass.
 
-## Project profiles
+## Profiles
 
-Detect the profile from routes, file names, content or the user's words, and read it before auditing
-or building. Apply one; for a page that mixes two (a report with a dashboard section), use the one that
-fits the main job and say so.
+Choose the profile from the content or the user's words, read it before auditing or building, and name it in
+the report. Use one; when a page mixes two, use the one that fits its main job. When none fits, use no profile:
+the general rules apply and the visual rating is advice.
 
 - **Marketing / landing**: `references/profile-marketing-landing.md` (includes pricing pages).
-- **SaaS / dashboard**: `references/profile-saas-dashboard.md` (operational tools used daily).
+- **SaaS / dashboard**: `references/profile-saas-dashboard.md` (tools operated daily).
 - **Analytics report**: `references/profile-analytics-report.md` (data pages read, presented or printed).
 - **E-commerce**: `references/profile-ecommerce.md` (storefronts and checkout).
+- **Mobile app**: `references/profile-mobile-app.md` (native, cross-platform and installable web apps).
 - **Children's learning app**: `references/profile-kids-app.md` (touch-first, ages 4 to 9).
 
-To add a profile for a new kind of product, copy the structure of an existing one: a `Detection:` line,
-a source-of-truth note, a simulation persona, and `## Overrides:` sections stating only differences.
+A new profile copies the structure of an existing one: a `Detection:` line, a source-of-truth note, the main
+task, a simulation persona, and `## Overrides:` sections that state only differences.
 
 ## Honesty
 
-State what the input could not confirm: real screen-reader output, touch latency, network timing,
-fonts that were not available. A named gap beats a guessed pass. Never report a measurement you did
-not take; never score what you could not see.
+State what the input could not confirm: real screen-reader output, a real device, touch latency, network
+timing, fonts that were not available. A named gap beats a guessed pass. Never score what you could not see.
 
-`references/examples.md` has worked findings at every severity; `references/durable-fixes.md` maps
-failure families to the tools that stop them returning.
+`references/examples.md` has worked findings at every severity; `references/durable-fixes.md` maps failure
+families to the tools that stop them returning.

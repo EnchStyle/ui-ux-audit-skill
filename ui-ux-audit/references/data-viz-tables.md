@@ -1,18 +1,21 @@
 # Category 16: Charts, Tables and Dashboards
 
+Severities are set only in `severity-registry.md`; the codes in brackets below are its rows.
+
 Data UI fails on precision, comparability and honesty, and sample data rarely stresses any of them.
 Recompute every figure that appears more than once; check that every control changes what it claims
 to change.
 
-## Honesty (Blocker on analytics products, Critical elsewhere)
+## Honesty
 
 - **Axes**: bar and column charts start at zero. A line chart may zoom its value range when the range
-  is stated on the chart ("axis from 40 to 60"); an unstated truncated axis that exaggerates a
-  difference is a Blocker on analytics products.
+  is stated on the chart ("axis from 40 to 60"); an unstated truncated or broken axis is `chart-axis`.
+  To check: compare the ratio of two bars' heights in pixels with the ratio of their values; if they differ,
+  the axis does not start at zero.
 - **Figures that should agree, agree**: a headline tile, the table total and the text quoting it are
-  the same number. A mismatch means one of them is wrong.
+  the same number (`figures-disagree`). Use the script's figures list and `table-total` candidates, and recompute.
 - **Controls do what they say**: a period or market selector that changes a label but not the data, or
-  applies to some widgets while claiming to apply to all, is Critical.
+  applies to some widgets while claiming to apply to all, is `control-relabels`.
 - **Missing data is not zero**: an empty series is an explicit empty state ("No readings from the north
   sites since 06:00"), never a flat line at zero or a tile reading "0 MW".
 - **Deltas** show direction by sign or arrow as well as colour, with magnitude and basis ("+4.2% vs
@@ -21,12 +24,12 @@ to change.
 ## Charts
 
 - **A title that states the point** ("Spot price peaked at 142 £/MWh on Tuesday") or at least what is
-  measured; axis titles with units; sensible tick density at every width. A chart missing its title,
-  axis titles, units or text alternative is one Warning finding per chart.
+  measured; axis titles with units; sensible tick density at every width. `chart-labels` is one finding
+  that lists every chart; axis titles are not needed where every value is labelled directly with its unit.
 - **Series**: colourblind-safe and distinguishable without colour (direct labels at line ends, markers
   or dash patterns); past about six series, group, filter or use small multiples. The same series keeps
-  the same colour in every chart. Series told apart only by colour, or marks below 3:1: Critical on
-  analytics products, Warning elsewhere.
+  the same colour in every chart. Series told apart only by colour: `chart-colour-only`; marks below 3:1:
+  `contrast-control`. The same series in different colours in different charts: `chart-consistency`.
 - **Room for labels**: the plot area starts after the widest tick label, lines never run through axis
   labels, and direct labels that would collide are offset with leader lines or moved to a legend.
 - **Semantic colour locked**: if green means good, it means good everywhere; whether "up" is good
@@ -35,7 +38,8 @@ to change.
   theme.
 - **Sparklines** carry an anchor: the current value, and a baseline or min and max.
 - **Responsive**: charts redraw at their container's width; labels stay at 12px or more; legends
-  move below; tick counts drop. A chart with a fixed pixel width that overflows is Critical.
+  move below; tick counts drop. A chart with a fixed pixel width that overflows is `page-overflow`.
+  Charts drawn on canvas cannot be measured by the script: check their text size and contrast on the screenshot.
 - **Tooltips** work with touch and keyboard, not only hover, and do not clip at the edges.
 - **Text alternative**: a caption stating the finding, or an accessible data table.
 
@@ -45,26 +49,33 @@ to change.
   text left; never centred data columns.
 - **Units in the header** ("Amount (USD)"), not repeated in every cell.
 - **Sticky header** on tables longer than about 15 rows (`thead th { position: sticky; top: 0 }`),
-  so scrolled rows keep their meaning (uicheck `table_sticky`): Warning. A sticky identifying column
-  on very wide tables is a bonus.
+  so scrolled rows keep their meaning (`table-sticky`). A sticky identifying column
+  on very wide tables is a bonus. The header sticks to the nearest box with `overflow` set, so a sideways
+  scroll wrapper around the table stops it sticking to the page: the script scrolls and looks. Three ways
+  keep the header in view without a scroll area inside a scroll area: the table scrolls with the page and
+  has no overflow box around it; in an app shell the table's box is the panel's one scroller; on phones a
+  wide table becomes stacked rows, or pages of 15 rows or fewer inside its sideways scroller. Nielsen Norman
+  Group's advice for tables on phones is the same in substance: keep column headers in view for any table
+  longer than a screen, keep the first column in view when the table scrolls sideways, and make clear that
+  there is more to the side (Mobile Tables, 17 September 2017, read 27 November 2026).
 - **Sort state visible** (column and direction, plus `aria-sort`).
 - **One separator strategy** (zebra, hairlines or space), consistent row height.
 - **Truncated values recoverable** (hover, focus, copy); middle ellipsis for addresses and hashes,
   where both ends carry meaning.
 - **One number format per metric**: thousands separators, fixed decimals per data type, locale-aware.
-  Three precisions for the same metric on one screen is Critical.
+  Different forms of one metric are `number-format`.
 - **States**: skeleton rows while loading; an empty result that says why and differs from an error;
   pagination or virtualisation beyond a few hundred rows.
 - **Phones**: a contained horizontal scroller with a visible cue, or rows collapsed into cards.
 
 ## Dashboards
 
-- **One primary answer per view**: the most important metric dominates; twelve equal tiles is
-  overchoice (Warning).
+- **One primary answer per view**: the most important metric dominates; many equal tiles with
+  nothing larger is `hierarchy-flat`.
 - **One tile anatomy**: label, value, change, timeframe, always in the same positions and format.
 - **Comparable things share scales and timeframes**, or state the difference.
-- **Freshness** shown ("Updated 14:32"); silent staleness on operational or financial data is Critical,
-  and a "refreshes every 5 minutes" claim that never refreshes is a false statement.
+- **Freshness** shown ("Updated 14:32"); none is `stale-data`; a "refreshes every 5 minutes"
+  claim that never refreshes is `false-feedback`.
 - **Precision restraint**: show the precision that supports the decision, from one central formatter.
 - **Live data**: fixed-width, tabular values so layouts do not breathe; brief, throttled change
   highlights; new rows never steal the scroll position.

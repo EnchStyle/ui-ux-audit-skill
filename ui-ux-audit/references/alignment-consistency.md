@@ -4,7 +4,8 @@ This category targets the defining AI failure: every component is a one-off. Wit
 system, the second button gets fresh padding, the third card a new radius, and a row of cards lines up
 on the outside while everything inside floats. People see these faults instantly; tools rarely do.
 Audit across components, not within them, and measure rather than eyeball: `scripts/uicheck.py`
-reports each check below under the key named in brackets.
+reports each check below under the registry code named in brackets.
+Severities are set only in `severity-registry.md`; the codes in brackets below are its rows.
 
 ## The global system block (write it first in build mode, look for it in audits)
 
@@ -40,102 +41,105 @@ waiting to be extracted.
 
 ## Checks
 
-Each check: what to look for, how to measure, the fix, the default severity. Group all occurrences of
-one kind into one finding.
+Each check: what to look for, how to measure, the fix. All occurrences of one kind are one finding.
 
-### Shared edges [near_miss_edges]
+### Shared edges [`edge-near-miss`]
 Everything in a section starts on the same left edge: heading, intro, card grid, table, chart plot
 area. A deliberate offset (a hanging label, an indented quote) is fine; a near miss of 1 to 6px looks
 like a mistake, and nothing reads as sloppier. Common causes: a heading container with different
 padding from the grid, a card grid with a negative margin, a chart plot area inset differently from
 the panel title. Fix: one container and one inset per level; align the chart plot area to the panel's
-text edge. Polish; Warning when it is in the hero or a primary grid.
+text edge.
 
-### Card rows share inner lines [card_rows]
+### Card rows share inner lines [`card-rows`]
 Equal-height cards still float their content to the top, so titles, chips, prices and buttons land
 at different heights when copy differs in length. First choice: the grid owns the rows and each card
-spans them with `grid-template-rows: subgrid` (widely supported since 2023), so every part lines up
+spans them with `grid-template-rows: subgrid` (in every major browser since September 2023), so every part lines up
 without clipping copy. Fallback: card as a flex column, variable parts reserved with `min-height` in
 `lh` units (for example `min-height: 3lh` for a three-line description), footer pinned with
-`margin-top: auto`. Verify with deliberately uneven copy. Warning at desktop widths; Critical when
-the misaligned part is a price or primary CTA that users compare across cards; Polish when it happens
-only at phone widths.
+`margin-top: auto`. Verify with deliberately uneven copy.
 
-### Tile values on one baseline [baselines]
+### Tile values on one baseline [`tile-baseline`]
 In a row of KPI or stat tiles, the values sit on one line. A label that wraps in one tile pushes its
 value down. Fix: subgrid rows, or reserve two lines for labels (`min-height: 2lh`), or shorten labels
-so none wraps at any width. Warning at desktop widths; Polish at phone widths only.
+so none wraps at any width.
 
-### No lone item on the last row [grid_orphans]
+### No lone item on the last row [`grid-lone-item`]
 A fixed set (features, plans, stats, team, logos, tags) whose last row holds a single item looks
 unfinished. Fix: choose counts that divide the column count at each breakpoint (6 or 9 for three
-columns, 4 or 8 for four), let a featured item span two columns, or change the column count per
+columns, 4 or 8 for four), let the last item span the row (a spanning item is not a lone item), or change the column count per
 breakpoint so the set balances. Catalogues and long lists that load more are exempt: a partial last
-row is expected. Warning at the main desktop and phone layouts; Polish at in-between widths.
+row is expected.
 
-### No single word alone on a last line [widows]
+### No single word alone on a last line [`widow`, `label-wrap`]
 Headings, card titles, button labels, short intros and captions never end with one word alone, at
 any width you ship. Fix: `text-wrap: balance` on headings and short text (Chromium balances up to six
-lines, Firefox up to ten); `text-wrap: pretty` on paragraphs (Chromium and Safari only, and it only
-avoids short last lines in some cases); `&nbsp;` between the last two words of key headlines; a
+lines, Firefox up to ten); `text-wrap: pretty` on paragraphs (browser support varies, so treat it as an enhancement); `&nbsp;` between the last two words of key headlines; a
 tighter `max-width` so the break falls earlier. A button label that wraps to two lines is a sizing
 fault: shorten the label or widen the button. Widows depend on the font, so check with the real font
-and name stand-ins. Polish (one finding for all).
+and name stand-ins.
 
-### Concentric corners [nested_radius]
+### Concentric corners [`radius-nested`]
 An element inset inside a rounded container takes `inner radius = outer radius − inset` (a card with
 16px radius and 8px padding holds an image with 8px radius). Equal radii at a small inset make the
-corners look pinched. Polish.
+corners look pinched. The rule applies only while the inset is smaller than the outer radius; beyond that the inner
+shape is far from the corner and takes any radius of the system.
 
-### One height per control size [control_heights]
+### One height per control size [`control-heights`]
 Inputs, selects and buttons that sit side by side share one height from the control tokens
 (`--ctl-md: 40px`). A 40px input beside a 48px button is the classic newsletter-row fault; filter
 bars with three different heights the dashboard one. Set `height` or `min-height` from the token and
 `box-sizing: border-box`; align with `align-items: stretch` or matching heights, never by nudging.
-Warning.
 
-### One size per repeated component [chip_heights, icon_sizes]
+### One width per option of a switch [`segment-widths`]
+The options of one segmented control or toggle share one width, set by the longest label
+(`display: grid; grid-auto-flow: column; grid-auto-columns: 1fr`, or `flex: 1 1 0` on each option). When
+every option is only as wide as its own label, a long option beside a short one makes the control lopsided,
+and the selected pill jumps in size each time the choice changes. If the labels differ so much that equal
+widths waste the row, shorten the long label before giving up equal widths. Apple's guidance for segmented
+controls says the same: with equal widths the control feels balanced (Human Interface Guidelines, Segmented
+controls, read 27 November 2026). Underlined tabs, navigation links, filter chips and separate buttons are
+different components: their width follows the label.
+
+### One size per repeated component [`chip-heights`, `icon-sizes`]
 Chips, badges and status pills: one height (`--chip`), one padding, one text size, whether or not
 they hold an icon. Icons: one size per role (16 inline, 20 in controls, 24 in navigation), one stroke
-weight, one family. Buttons: one height per size. Polish; Warning when the drift is in a primary
-component.
+weight, one family. Buttons: one height per size.
 
-### One media ratio per set [ratios]
+### One media ratio per set [`media-ratios`]
 Images, thumbnails, video posters and sparklines in one set share one aspect ratio from a token, with
 `aspect-ratio` on the box and `object-fit: cover` on the image. Mixed ratios make a row of cards
-ragged even when the boxes line up. Warning.
+ragged even when the boxes line up.
 
-### One section rhythm [census: section_padding]
+### One section rhythm [`section-rhythm`]
 Sections share one vertical padding (or one small set tied to roles: hero, standard section, closing
 band). Five different paddings for five ordinary sections (64, 96, 80, 72px) is drift the eye reads
-as uneven pacing. Fix: one `--section` token, with a smaller step on phones. Warning.
+as uneven pacing. Fix: one `--section` token, with a smaller step on phones.
 
-### One gutter per level [gutters]
+### One gutter per level [`gutter-drift`]
 Gaps between cards are the same wherever cards sit at the same level (all KPI rows, all panel rows).
 A tighter gap for a strip of small tiles can be deliberate; 24px in one row of panels and 16px in the
 next is drift, and it knocks every edge below it out of line. Use `gap: var(--gutter)` on every grid.
-Warning.
 
-### Padding that reads as equal [pad_asymmetry]
+### Padding that reads as equal [`pad-asymmetry`]
 A box whose bottom space is visibly larger than its top usually has a last child with a bottom
 margin (a `p` inside a card). Fix: space children with `gap` in a flex or grid column, or
-`> :last-child { margin-bottom: 0 }`. Polish.
+`> :last-child { margin-bottom: 0 }`.
 
-### Headings belong to what follows [heading_prox]
-The space above a heading is clearly larger than the space below it (about twice), so the heading
-groups with its own content. A heading closer to the previous section than to its own content reads
-as a caption for the wrong thing. Warning.
+### Headings belong to what follows [`heading-proximity`]
+The space above a heading is larger than the space below it (about twice is a good target), so the heading
+groups with its own content. The finding is a heading that sits closer to the block above than to its own
+content: it reads as a caption for the wrong thing.
 
-### Tables align by type [table_align]
+### Tables align by type [`table-align`]
 Numeric columns are right-aligned with tabular figures, and their headers are aligned the same way.
-Text columns left-aligned. Never centre data columns. Warning.
+Text columns left-aligned. Never centre data columns: digits can be compared only when they line up by place value.
 
-### Census: radii, shadows, type sizes [census]
+### Census: radii, shadows, type sizes [`radius-drift`, `shadow-drift`, `type-scale-drift`]
 One radius scale (at most three steps plus pill and circle), one elevation language (one shadow style
 at one or two levels, or borders instead), type sizes from the scale. A value that appears once is
-drift unless it is documented. Two radius systems on one screen (sharp beside round) or two shadow
-languages: Warning. Small drift within one system (radii 2 to 4px apart, a one-off button padding):
-Polish.
+drift unless it is documented. The limits exist because every extra value is one more thing the eye has to
+reconcile; unplanned values are how a page starts to look assembled instead of designed.
 
 ### Optical alignment (by eye on the screenshots)
 - Icons beside text centre on the cap height, not the line box; play and arrow glyphs are nudged
@@ -146,12 +150,11 @@ Polish.
   `hanging-punctuation` works only in Safari).
 - Icons, avatars and logos in a row look the same size, which may mean slightly different boxes
   for different shapes.
-Polish.
 
 ### Inner spacing smaller than outer spacing
 Space inside a group is smaller than space between groups (padding 16px inside cards, 24px between
 cards, 96px between sections). When inner and outer spacing are equal, grouping disappears and
-everything floats. Warning.
+everything floats.
 
 ## Cross-component drift census
 
@@ -163,10 +166,3 @@ everything floats. Warning.
   both.
 - **Interaction patterns:** the same action behaves the same everywhere (inline edit versus modal,
   toasts from one corner, one destructive confirmation pattern).
-
-## Token health (report only when it causes visible drift)
-
-Colours, spacing, radii, shadows and type come from tokens with purpose names (`--color-danger`, not
-`--red-500`). Dark mode swaps token values centrally. Raw hex values scattered through components
-explain why drift happens: mention them in the Fix of the drift finding rather than as a finding of
-their own.
